@@ -10,7 +10,10 @@
 
 const body = document.body;
 
-const navLinks = document.querySelectorAll(".nav-menu a");
+const navLinks =
+    document.querySelectorAll(
+        ".nav-menu a"
+    );
 
 
 /* ==================================================
@@ -18,15 +21,19 @@ const navLinks = document.querySelectorAll(".nav-menu a");
    ================================================== */
 
 /*
-   Pilihan tema:
-   - light  = Mode terang
-   - dark   = Mode gelap
-   - system = Mengikuti tema perangkat
+    Pilihan tema:
+
+    light  = Mode terang
+    dark   = Mode gelap
+    system = Mengikuti tema perangkat
 */
 
 function setTheme(theme) {
 
-    body.setAttribute("data-theme", theme);
+    body.setAttribute(
+        "data-theme",
+        theme
+    );
 
     localStorage.setItem(
         "xcovibe-theme",
@@ -41,7 +48,9 @@ function setTheme(theme) {
    ================================================== */
 
 const savedTheme =
-    localStorage.getItem("xcovibe-theme");
+    localStorage.getItem(
+        "xcovibe-theme"
+    );
 
 
 if (savedTheme) {
@@ -51,8 +60,9 @@ if (savedTheme) {
 } else {
 
     /*
-       Jika pengguna belum pernah memilih tema,
-       website otomatis mengikuti tema perangkat.
+        Pengguna belum memilih tema.
+
+        Website menggunakan System Mode.
     */
 
     setTheme("system");
@@ -79,12 +89,15 @@ systemTheme.addEventListener(
                 "xcovibe-theme"
             );
 
+
         /*
-           Hanya bereaksi jika pengguna
-           menggunakan mode System.
+            Hanya mengikuti perubahan
+            perangkat jika mode = system.
         */
 
-        if (currentTheme === "system") {
+        if (
+            currentTheme === "system"
+        ) {
 
             body.setAttribute(
                 "data-theme",
@@ -101,28 +114,33 @@ systemTheme.addEventListener(
    5. NAVIGATION ACTIVE STATE
    ================================================== */
 
-navLinks.forEach((link) => {
+navLinks.forEach(
+    (link) => {
 
-    link.addEventListener(
-        "click",
-        () => {
+        link.addEventListener(
+            "click",
+            () => {
 
-            navLinks.forEach((item) => {
+                navLinks.forEach(
+                    (item) => {
 
-                item.classList.remove(
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                link.classList.add(
                     "active"
                 );
 
-            });
+            }
+        );
 
-            link.classList.add(
-                "active"
-            );
-
-        }
-    );
-
-});
+    }
+);
 
 
 /* ==================================================
@@ -141,49 +159,65 @@ window.addEventListener(
 
         let currentSection = "";
 
-        sections.forEach((section) => {
 
-            const sectionTop =
-                section.offsetTop - 150;
+        sections.forEach(
+            (section) => {
 
-            const sectionHeight =
-                section.offsetHeight;
+                const sectionTop =
+                    section.offsetTop - 150;
 
-            if (
-                window.scrollY >= sectionTop &&
-                window.scrollY <
-                    sectionTop + sectionHeight
-            ) {
 
-                currentSection =
-                    section.getAttribute("id");
+                const sectionHeight =
+                    section.offsetHeight;
+
+
+                if (
+                    window.scrollY >=
+                        sectionTop
+                    &&
+                    window.scrollY <
+                        sectionTop +
+                        sectionHeight
+                ) {
+
+                    currentSection =
+                        section.getAttribute(
+                            "id"
+                        );
+
+                }
 
             }
+        );
 
-        });
 
+        navLinks.forEach(
+            (link) => {
 
-        navLinks.forEach((link) => {
-
-            link.classList.remove(
-                "active"
-            );
-
-            const target =
-                link.getAttribute("href");
-
-            if (
-                target ===
-                `#${currentSection}`
-            ) {
-
-                link.classList.add(
+                link.classList.remove(
                     "active"
                 );
 
-            }
 
-        });
+                const target =
+                    link.getAttribute(
+                        "href"
+                    );
+
+
+                if (
+                    target ===
+                    `#${currentSection}`
+                ) {
+
+                    link.classList.add(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
 
     }
 );
