@@ -1,32 +1,13 @@
-/* ==================================================
-   XCOVIBE COMMUNITY
-   JAVASCRIPT
-   ================================================== */
-
-
-/* ==================================================
-   1. ELEMENT
-   ================================================== */
-
 const body = document.body;
 
-const navLinks =
-    document.querySelectorAll(
-        ".nav-menu a"
-    );
+const navLinks = document.querySelectorAll(
+    ".nav-menu a"
+);
 
 
-/* ==================================================
-   2. THEME SYSTEM
-   ================================================== */
-
-/*
-    Pilihan tema:
-
-    light  = Mode terang
-    dark   = Mode gelap
-    system = Mengikuti tema perangkat
-*/
+/* =========================
+   THEME
+========================= */
 
 function setTheme(theme) {
 
@@ -39,19 +20,17 @@ function setTheme(theme) {
         "xcovibe-theme",
         theme
     );
-
 }
 
 
-/* ==================================================
-   3. LOAD SAVED THEME
-   ================================================== */
+/* =========================
+   LOAD THEME
+========================= */
 
 const savedTheme =
     localStorage.getItem(
         "xcovibe-theme"
     );
-
 
 if (savedTheme) {
 
@@ -59,163 +38,123 @@ if (savedTheme) {
 
 } else {
 
-    /*
-        Pengguna belum memilih tema.
-
-        Website menggunakan System Mode.
-    */
-
     setTheme("system");
-
 }
 
 
-/* ==================================================
-   4. SYSTEM THEME DETECTION
-   ================================================== */
+/* =========================
+   SYSTEM THEME
+========================= */
 
 const systemTheme =
     window.matchMedia(
         "(prefers-color-scheme: dark)"
     );
 
-
 systemTheme.addEventListener(
     "change",
-    () => {
+    function () {
 
         const currentTheme =
             localStorage.getItem(
                 "xcovibe-theme"
             );
 
-
-        /*
-            Hanya mengikuti perubahan
-            perangkat jika mode = system.
-        */
-
-        if (
-            currentTheme === "system"
-        ) {
+        if (currentTheme === "system") {
 
             body.setAttribute(
                 "data-theme",
                 "system"
             );
-
         }
-
     }
 );
 
 
-/* ==================================================
-   5. NAVIGATION ACTIVE STATE
-   ================================================== */
+/* =========================
+   NAVIGATION
+========================= */
 
-navLinks.forEach(
-    (link) => {
+navLinks.forEach(function (link) {
 
-        link.addEventListener(
-            "click",
-            () => {
+    link.addEventListener(
+        "click",
+        function () {
 
-                navLinks.forEach(
-                    (item) => {
+            navLinks.forEach(
+                function (item) {
 
-                        item.classList.remove(
-                            "active"
-                        );
+                    item.classList.remove(
+                        "active"
+                    );
+                }
+            );
 
-                    }
-                );
+            this.classList.add(
+                "active"
+            );
+        }
+    );
 
-
-                link.classList.add(
-                    "active"
-                );
-
-            }
-        );
-
-    }
-);
+});
 
 
-/* ==================================================
-   6. SCROLL ACTIVE NAVIGATION
-   ================================================== */
+/* =========================
+   ACTIVE NAV ON SCROLL
+========================= */
 
 const sections =
     document.querySelectorAll(
         "main section[id]"
     );
 
-
 window.addEventListener(
     "scroll",
-    () => {
+    function () {
 
         let currentSection = "";
 
-
         sections.forEach(
-            (section) => {
+            function (section) {
 
                 const sectionTop =
                     section.offsetTop - 150;
 
-
-                const sectionHeight =
-                    section.offsetHeight;
-
-
                 if (
                     window.scrollY >=
-                        sectionTop
-                    &&
-                    window.scrollY <
-                        sectionTop +
-                        sectionHeight
+                    sectionTop
                 ) {
 
                     currentSection =
                         section.getAttribute(
                             "id"
                         );
-
                 }
-
             }
         );
 
 
         navLinks.forEach(
-            (link) => {
+            function (link) {
 
                 link.classList.remove(
                     "active"
                 );
 
-
-                const target =
+                const href =
                     link.getAttribute(
                         "href"
                     );
 
-
                 if (
-                    target ===
-                    `#${currentSection}`
+                    href ===
+                    "#" + currentSection
                 ) {
 
                     link.classList.add(
                         "active"
                     );
-
                 }
-
             }
         );
 
@@ -223,13 +162,13 @@ window.addEventListener(
 );
 
 
-/* ==================================================
-   7. PAGE LOADED
-   ================================================== */
+/* =========================
+   READY
+========================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function () {
 
         console.log(
             "XCOVIBE COMMUNITY berhasil dimuat."
