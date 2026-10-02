@@ -1,178 +1,263 @@
-const body = document.body;
-
-const navLinks = document.querySelectorAll(
-    ".nav-menu a"
-);
+/* =========================
+   XCOVIBE COMMUNITY
+   ========================= */
 
 
 /* =========================
    THEME
-========================= */
+   ========================= */
 
-function setTheme(theme) {
-
-    body.setAttribute(
-        "data-theme",
-        theme
-    );
-
-    localStorage.setItem(
-        "xcovibe-theme",
-        theme
-    );
-}
-
-
-/* =========================
-   LOAD THEME
-========================= */
-
-const savedTheme =
-    localStorage.getItem(
-        "xcovibe-theme"
-    );
+const savedTheme = localStorage.getItem("xcovibe-theme");
 
 if (savedTheme) {
-
-    setTheme(savedTheme);
-
+    document.documentElement.setAttribute(
+        "data-theme",
+        savedTheme
+    );
 } else {
-
-    setTheme("system");
+    document.documentElement.setAttribute(
+        "data-theme",
+        "system"
+    );
 }
 
 
 /* =========================
-   SYSTEM THEME
-========================= */
+   SEARCH
+   ========================= */
 
-const systemTheme =
-    window.matchMedia(
-        "(prefers-color-scheme: dark)"
-    );
+const searchInput = document.getElementById("searchInput");
+const posts = document.querySelectorAll(".post");
+const emptyResult = document.getElementById("emptyResult");
 
-systemTheme.addEventListener(
-    "change",
-    function () {
 
-        const currentTheme =
-            localStorage.getItem(
-                "xcovibe-theme"
-            );
+searchInput.addEventListener("input", function () {
 
-        if (currentTheme === "system") {
+    const keyword = this.value
+        .toLowerCase()
+        .trim();
 
-            body.setAttribute(
-                "data-theme",
-                "system"
-            );
+    let visiblePosts = 0;
+
+
+    posts.forEach(function (post) {
+
+        const content = post.textContent.toLowerCase();
+
+        if (content.includes(keyword)) {
+
+            post.style.display = "block";
+
+            visiblePosts++;
+
+        } else {
+
+            post.style.display = "none";
+
         }
+
+    });
+
+
+    if (visiblePosts === 0) {
+
+        emptyResult.style.display = "block";
+
+    } else {
+
+        emptyResult.style.display = "none";
+
     }
-);
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-navLinks.forEach(function (link) {
-
-    link.addEventListener(
-        "click",
-        function () {
-
-            navLinks.forEach(
-                function (item) {
-
-                    item.classList.remove(
-                        "active"
-                    );
-                }
-            );
-
-            this.classList.add(
-                "active"
-            );
-        }
-    );
 
 });
 
 
 /* =========================
-   ACTIVE NAV ON SCROLL
-========================= */
+   COMMUNITY FILTER
+   ========================= */
 
-const sections =
-    document.querySelectorAll(
-        "main section[id]"
-    );
+const communityButtons =
+    document.querySelectorAll(".community-item");
 
-window.addEventListener(
-    "scroll",
-    function () {
 
-        let currentSection = "";
+communityButtons.forEach(function (button) {
 
-        sections.forEach(
-            function (section) {
+    button.addEventListener("click", function () {
 
-                const sectionTop =
-                    section.offsetTop - 150;
+        communityButtons.forEach(function (item) {
+            item.classList.remove("active");
+        });
 
-                if (
-                    window.scrollY >=
-                    sectionTop
-                ) {
+        this.classList.add("active");
 
-                    currentSection =
-                        section.getAttribute(
-                            "id"
-                        );
-                }
+
+        const category =
+            this.dataset.category;
+
+
+        let visiblePosts = 0;
+
+
+        posts.forEach(function (post) {
+
+            const postCategory =
+                post.dataset.category;
+
+
+            if (
+                category === "all" ||
+                postCategory === category
+            ) {
+
+                post.style.display = "block";
+
+                visiblePosts++;
+
+            } else {
+
+                post.style.display = "none";
+
             }
-        );
+
+        });
 
 
-        navLinks.forEach(
-            function (link) {
+        if (visiblePosts === 0) {
 
-                link.classList.remove(
-                    "active"
-                );
+            emptyResult.style.display = "block";
 
-                const href =
-                    link.getAttribute(
-                        "href"
-                    );
+        } else {
 
-                if (
-                    href ===
-                    "#" + currentSection
-                ) {
+            emptyResult.style.display = "none";
 
-                    link.classList.add(
-                        "active"
-                    );
-                }
-            }
-        );
+        }
 
-    }
-);
+    });
+
+});
 
 
 /* =========================
-   READY
-========================= */
+   LIKE BUTTON
+   ========================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+const likeButtons =
+    document.querySelectorAll(".like-btn");
 
-        console.log(
-            "XCOVIBE COMMUNITY berhasil dimuat."
-        );
+
+likeButtons.forEach(function (button) {
+
+    button.addEventListener("click", function () {
+
+        this.classList.toggle("liked");
+
+
+        const count =
+            this.querySelector("span");
+
+
+        let number =
+            parseInt(count.textContent);
+
+
+        if (this.classList.contains("liked")) {
+
+            number++;
+
+        } else {
+
+            number--;
+
+        }
+
+
+        count.textContent = number;
+
+    });
+
+});
+
+
+/* =========================
+   SORT BUTTON
+   ========================= */
+
+const sortButton =
+    document.getElementById("sortBtn");
+
+
+sortButton.addEventListener("click", function () {
+
+    if (this.textContent.includes("Latest")) {
+
+        this.textContent = "Popular ↓";
+
+    } else {
+
+        this.textContent = "Latest ↓";
 
     }
-);
+
+});
+
+
+/* =========================
+   LOGIN / REGISTER
+   ========================= */
+
+const loginButton =
+    document.querySelector(".login-btn");
+
+const registerButton =
+    document.querySelector(".register-btn");
+
+
+loginButton.addEventListener("click", function () {
+
+    alert("Fitur Login akan ditambahkan.");
+
+});
+
+
+registerButton.addEventListener("click", function () {
+
+    alert("Fitur Register akan ditambahkan.");
+
+});
+
+
+/* =========================
+   CREATE DISCUSSION
+   ========================= */
+
+const createButton =
+    document.querySelector(".create-btn");
+
+
+createButton.addEventListener("click", function () {
+
+    alert("Form Create Discussion akan ditambahkan.");
+
+});
+
+
+/* =========================
+   MOBILE SEARCH
+   ========================= */
+
+const mobileSearch =
+    document.querySelector(".mobile-nav a:nth-child(3)");
+
+
+mobileSearch.addEventListener("click", function (event) {
+
+    event.preventDefault();
+
+    searchInput.focus();
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+});

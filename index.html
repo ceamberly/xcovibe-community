@@ -1,480 +1,398 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>XCOVIBE COMMUNITY</title>
 
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
     <!-- HEADER -->
-    <header class="header">
+    <header class="topbar">
 
-        <div class="container navbar">
+        <div class="brand">
+            <a href="#">XCO<span>VIBE</span></a>
+            <small>Connect. Share. Vibe.</small>
+        </div>
 
-            <a href="#home" class="logo">
-                XCO<span>VIBE</span>
-            </a>
+        <div class="search-box">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search discussions..."
+            >
+        </div>
 
-            <nav class="nav-menu">
-
-                <a href="#home" class="active">
-                    Home
-                </a>
-
-                <a href="#community">
-                    Community
-                </a>
-
-                <a href="#trending">
-                    Trending
-                </a>
-
-                <a href="#about">
-                    About
-                </a>
-
-            </nav>
-
-            <!-- LOGIN & REGISTER -->
-            <div class="auth-menu">
-
-                <a href="#" class="login-link">
-                    Login
-                </a>
-
-                <a href="#" class="register-link">
-                    Register
-                </a>
-
-            </div>
-
+        <div class="auth">
+            <button class="login-btn">Login</button>
+            <button class="register-btn">Register</button>
         </div>
 
     </header>
 
 
     <!-- MAIN -->
-    <main>
+    <main class="layout">
 
-        <!-- HERO -->
-        <section class="hero" id="home">
+        <!-- LEFT SIDEBAR -->
+        <aside class="left-sidebar">
 
-            <div class="container">
+            <div class="sidebar-title">
+                <span>COMMUNITY</span>
 
-                <div class="hero-content">
+                <button
+                    class="create-btn"
+                    title="Create discussion"
+                    aria-label="Create discussion"
+                >
+                    +
+                </button>
+            </div>
 
-                    <div class="hero-text">
 
-                        <span class="hero-label">
-                            WELCOME TO XCOVIBE
-                        </span>
+            <nav class="community-nav">
 
-                        <h1>
-                            FIND YOUR
-                            <span>VIBE.</span>
-                        </h1>
+                <button
+                    class="community-item active"
+                    data-category="all"
+                >
+                    <span>All discussions</span>
+                    <b>24</b>
+                </button>
 
-                        <p class="hero-description">
-                            Tempat untuk terhubung, berbagi cerita,
-                            berdiskusi, dan menemukan orang-orang
-                            dengan vibe yang sama.
-                        </p>
+                <button
+                    class="community-item"
+                    data-category="general"
+                >
+                    <span>General</span>
+                    <b>8</b>
+                </button>
 
-                        <div class="hero-buttons">
+                <button
+                    class="community-item"
+                    data-category="gaming"
+                >
+                    <span>Gaming</span>
+                    <b>6</b>
+                </button>
 
-                            <a
-                                href="#community"
-                                class="btn btn-primary"
-                            >
-                                Explore Community
-                            </a>
+                <button
+                    class="community-item"
+                    data-category="technology"
+                >
+                    <span>Technology</span>
+                    <b>5</b>
+                </button>
 
-                            <a
-                                href="#trending"
-                                class="btn btn-secondary"
-                            >
-                                See Trending
-                            </a>
+                <button
+                    class="community-item"
+                    data-category="creative"
+                >
+                    <span>Creative</span>
+                    <b>5</b>
+                </button>
 
+            </nav>
+
+        </aside>
+
+
+        <!-- CENTER FEED -->
+        <section class="feed">
+
+            <div class="feed-header">
+
+                <div>
+                    <span class="section-label">
+                        COMMUNITY
+                    </span>
+
+                    <h1>Discussions</h1>
+                </div>
+
+                <button id="sortBtn" class="sort-btn">
+                    Latest ↓
+                </button>
+
+            </div>
+
+
+            <!-- POST 1 -->
+            <article
+                class="post"
+                data-category="general"
+            >
+
+                <div class="post-top">
+
+                    <div class="user-info">
+
+                        <div class="avatar">
+                            A
+                        </div>
+
+                        <div>
+                            <strong>alexx</strong>
+
+                            <span>
+                                General · 12 min ago
+                            </span>
                         </div>
 
                     </div>
 
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- COMMUNITY -->
-        <section
-            class="community-section"
-            id="community"
-        >
-
-            <div class="container">
-
-                <div class="section-heading">
-
-                    <span class="section-label">
-                        EXPLORE
-                    </span>
-
-                    <h2>
-                        Find Your Community
-                    </h2>
-
-                    <p>
-                        Temukan ruang yang sesuai dengan
-                        minat dan vibe kamu.
-                    </p>
+                    <button class="more-btn">
+                        •••
+                    </button>
 
                 </div>
 
 
-                <div class="community-list">
+                <h2>
+                    Apa yang sedang kalian lakukan hari ini?
+                </h2>
 
-                    <!-- 01 -->
-                    <a
-                        href="#"
-                        class="community-item"
-                    >
-
-                        <span class="community-number">
-                            
-                        </span>
-
-                        <div class="community-item-content">
-
-                            <h3>
-                                General
-                            </h3>
-
-                            <p>
-                                Tempat berbagi cerita,
-                                obrolan dan pengalaman.
-                            </p>
-
-                        </div>
-
-                        <span class="community-arrow">
-                            →
-                        </span>
-
-                    </a>
+                <p>
+                    Lagi penasaran sama kegiatan teman-teman
+                    di komunitas. Ceritain sedikit aktivitas kalian
+                    hari ini.
+                </p>
 
 
-                    <!-- 02 -->
-                    <a
-                        href="#"
-                        class="community-item"
-                    >
+                <div class="post-actions">
 
-                        <span class="community-number">
-                            
-                        </span>
+                    <button class="like-btn">
+                        ♡ <span>48</span>
+                    </button>
 
-                        <div class="community-item-content">
+                    <button>
+                        💬 <span>24</span>
+                    </button>
 
-                            <h3>
-                                Gaming
-                            </h3>
-
-                            <p>
-                                Temukan teman baru yang
-                                memiliki game favorit yang sama.
-                            </p>
-
-                        </div>
-
-                        <span class="community-arrow">
-                            →
-                        </span>
-
-                    </a>
-
-
-                    <!-- 03 -->
-                    <a
-                        href="#"
-                        class="community-item"
-                    >
-
-                        <span class="community-number">
-                            
-                        </span>
-
-                        <div class="community-item-content">
-
-                            <h3>
-                                Technology
-                            </h3>
-
-                            <p>
-                                Mari berdiskusi mengenai
-                                perkembangan teknologi.
-                            </p>
-
-                        </div>
-
-                        <span class="community-arrow">
-                            →
-                        </span>
-
-                    </a>
-
-
-                    <!-- 04 -->
-                    <a
-                        href="#"
-                        class="community-item"
-                    >
-
-                        <span class="community-number">
-                            
-                        </span>
-
-                        <div class="community-item-content">
-
-                            <h3>
-                                Creative
-                            </h3>
-
-                            <p>
-                                Bagikan karya dan kreativitas
-                                bersama komunitas.
-                            </p>
-
-                        </div>
-
-                        <span class="community-arrow">
-                            →
-                        </span>
-
-                    </a>
+                    <button>
+                        ↗ Share
+                    </button>
 
                 </div>
 
-            </div>
-
-        </section>
+            </article>
 
 
-        <!-- TRENDING -->
-        <section
-            class="trending-section"
-            id="trending"
-        >
+            <!-- POST 2 -->
+            <article
+                class="post"
+                data-category="technology"
+            >
 
-            <div class="container">
+                <div class="post-top">
 
-                <div class="section-heading">
+                    <div class="user-info">
 
-                    <span class="section-label">
-                        TRENDING NOW
-                    </span>
-
-                    <h2>
-                        What's Happening?
-                    </h2>
-
-                    <p>
-                        Percakapan yang sedang ramai
-                        dibicarakan komunitas.
-                    </p>
-
-                </div>
-
-
-                <div class="trending-grid">
-
-                    <!-- TRENDING 01 -->
-                    <article class="trending-card">
-
-                        <div class="trending-top">
-
-                            <span class="trending-number">
-                                
-                            </span>
-
-                            <span class="trending-category">
-                                General
-                            </span>
-
+                        <div class="avatar avatar-blue">
+                            R
                         </div>
 
-                        <h3>
-                            Apa yang sedang kalian lakukan
-                            hari ini?
-                        </h3>
+                        <div>
+                            <strong>rianx</strong>
 
-                        <p class="trending-description">
-                            Bagikan cerita atau kegiatan
-                            kalian hari ini kepada komunitas.
-                        </p>
-
-                        <div class="trending-meta">
-                            💬 128 discussions
-                        </div>
-
-                    </article>
-
-
-                    <!-- TRENDING 02 -->
-                    <article class="trending-card">
-
-                        <div class="trending-top">
-
-                            <span class="trending-number">
-                                
+                            <span>
+                                Technology · 32 min ago
                             </span>
-
-                            <span class="trending-category">
-                                Technology
-                            </span>
-
                         </div>
-
-                        <h3>
-                            Teknologi apa yang paling menarik
-                            tahun ini?
-                        </h3>
-
-                        <p class="trending-description">
-                            Mari berdiskusi mengenai
-                            perkembangan teknologi terbaru.
-                        </p>
-
-                        <div class="trending-meta">
-                            💬 96 discussions
-                        </div>
-
-                    </article>
-
-
-                    <!-- TRENDING 03 -->
-                    <article class="trending-card">
-
-                        <div class="trending-top">
-
-                            <span class="trending-number">
-                                
-                            </span>
-
-                            <span class="trending-category">
-                                Gaming
-                            </span>
-
-                        </div>
-
-                        <h3>
-                            Game apa yang sedang kalian
-                            mainkan?
-                        </h3>
-
-                        <p class="trending-description">
-                            Temukan teman baru yang memiliki
-                            game favorit yang sama.
-                        </p>
-
-                        <div class="trending-meta">
-                            💬 74 discussions
-                        </div>
-
-                    </article>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ABOUT -->
-        <section
-            class="about-section"
-            id="about"
-        >
-
-            <div class="container">
-
-                <div class="about-box">
-
-                    <div class="about-box-content">
-
-                        <span class="section-label">
-                            ABOUT XCOVIBE
-                        </span>
-
-                        <h2>
-                            One Community.
-                            <br>
-                            Many Vibes.
-                        </h2>
-
-                        <p>
-                            XCOVIBE adalah tempat untuk
-                            bertemu orang baru, berbagi
-                            cerita, berdiskusi, dan menemukan
-                            komunitas yang sesuai dengan kamu.
-                        </p>
-
-                        <a
-                            href="#community"
-                            class="btn"
-                        >
-                            Join Community
-                        </a>
 
                     </div>
 
+                    <button class="more-btn">
+                        •••
+                    </button>
+
                 </div>
 
+
+                <h2>
+                    Teknologi apa yang paling menarik menurut kalian?
+                </h2>
+
+                <p>
+                    Banyak teknologi baru yang berkembang cepat.
+                    Menurut kalian, teknologi apa yang paling menarik
+                    untuk dipelajari sekarang?
+                </p>
+
+
+                <div class="post-actions">
+
+                    <button class="like-btn">
+                        ♡ <span>36</span>
+                    </button>
+
+                    <button>
+                        💬 <span>17</span>
+                    </button>
+
+                    <button>
+                        ↗ Share
+                    </button>
+
+                </div>
+
+            </article>
+
+
+            <!-- POST 3 -->
+            <article
+                class="post"
+                data-category="gaming"
+            >
+
+                <div class="post-top">
+
+                    <div class="user-info">
+
+                        <div class="avatar avatar-dark">
+                            K
+                        </div>
+
+                        <div>
+                            <strong>kyo</strong>
+
+                            <span>
+                                Gaming · 1 hour ago
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <button class="more-btn">
+                        •••
+                    </button>
+
+                </div>
+
+
+                <h2>
+                    Game apa yang sedang kalian mainkan?
+                </h2>
+
+                <p>
+                    Share game yang sedang kalian mainkan.
+                    Siapa tahu bisa menemukan teman mabar baru
+                    dari komunitas ini.
+                </p>
+
+
+                <div class="post-actions">
+
+                    <button class="like-btn">
+                        ♡ <span>29</span>
+                    </button>
+
+                    <button>
+                        💬 <span>13</span>
+                    </button>
+
+                    <button>
+                        ↗ Share
+                    </button>
+
+                </div>
+
+            </article>
+
+
+            <!-- EMPTY SEARCH -->
+            <div id="emptyResult" class="empty-result">
+                Tidak ada diskusi yang ditemukan.
             </div>
 
         </section>
+
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+
+            <section class="side-section">
+
+                <div class="side-heading">
+                    TRENDING
+                </div>
+
+                <a href="#" class="trend">
+                    <span>#gaming</span>
+                    <small>1.2k discussions</small>
+                </a>
+
+                <a href="#" class="trend">
+                    <span>#technology</span>
+                    <small>864 discussions</small>
+                </a>
+
+                <a href="#" class="trend">
+                    <span>#creative</span>
+                    <small>621 discussions</small>
+                </a>
+
+                <a href="#" class="trend">
+                    <span>#music</span>
+                    <small>438 discussions</small>
+                </a>
+
+            </section>
+
+
+            <section class="side-section online-section">
+
+                <div class="side-heading">
+                    ONLINE NOW
+                </div>
+
+                <div class="online-number">
+                    124
+                </div>
+
+                <p>
+                    people are currently active
+                </p>
+
+                <div class="online-line">
+                    <span></span>
+                    Community is active
+                </div>
+
+            </section>
+
+        </aside>
 
     </main>
 
 
-    <!-- FOOTER -->
-    <footer class="footer">
+    <!-- MOBILE NAV -->
+    <nav class="mobile-nav">
 
-        <div class="container footer-content">
+        <a href="#" class="mobile-active">
+            Home
+        </a>
 
-            <div class="footer-brand">
-                XCOVIBE COMMUNITY
-            </div>
+        <a href="#">
+            Community
+        </a>
 
-            <div class="footer-text">
-                Connect • Share • Vibe
-            </div>
+        <a href="#">
+            Search
+        </a>
 
-            <div class="footer-text">
-                © 2026 XCOVIBE
-            </div>
+        <a href="#">
+            Profile
+        </a>
 
-        </div>
-
-    </footer>
+    </nav>
 
 
     <script src="js/script.js"></script>
 
 </body>
-
 </html>
