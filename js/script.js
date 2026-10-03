@@ -1,482 +1,380 @@
 /* =========================================================
    XCOVIBE COMMUNITY
-   SCRIPT.JS
+   ACCOUNT + COMMUNITY SYSTEM
    ========================================================= */
 
+document.addEventListener("DOMContentLoaded", function () {
 
-/* =========================================================
-   THEME
-   ========================================================= */
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
 
-const savedTheme =
-    localStorage.getItem("xcovibe-theme");
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const emptyResult =
+        document.getElementById("emptyResult");
+
+    const sortButton =
+        document.getElementById("sortBtn");
+
+    const toast =
+        document.getElementById("toast");
+
+    const toastMessage =
+        document.getElementById("toastMessage");
+
+    const loginButton =
+        document.querySelector(".login-btn");
+
+    const registerButton =
+        document.querySelector(".register-btn");
+
+    const createButton =
+        document.querySelector(".create-btn");
+
+    const accountModal =
+        document.getElementById("accountModal");
+
+    const closeAccountModal =
+        document.getElementById("closeAccountModal");
+
+    const accountLoginBtn =
+        document.getElementById("accountLoginBtn");
+
+    const accountRegisterBtn =
+        document.getElementById("accountRegisterBtn");
+
+    const registerModal =
+        document.getElementById("registerModal");
+
+    const closeRegister =
+        document.getElementById("closeRegister");
+
+    const cancelRegister =
+        document.getElementById("cancelRegister");
+
+    const registerForm =
+        document.getElementById("registerForm");
+
+    const createModal =
+        document.getElementById("createModal");
+
+    const closeModal =
+        document.getElementById("closeModal");
+
+    const cancelModal =
+        document.getElementById("cancelModal");
+
+    const createForm =
+        document.getElementById("createForm");
 
 
-if (savedTheme) {
+    /* =====================================================
+       STORAGE
+       ===================================================== */
 
-    document.documentElement.setAttribute(
-        "data-theme",
-        savedTheme
-    );
+    const ACCOUNTS_KEY =
+        "xcovibe-accounts";
 
-} else {
+    const CURRENT_USER_KEY =
+        "xcovibe-current-user";
 
-    document.documentElement.setAttribute(
-        "data-theme",
-        "system"
-    );
+    const LOGGED_IN_KEY =
+        "xcovibe-logged-in";
 
-}
-
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
-
-const searchInput =
-    document.getElementById("searchInput");
-
-const emptyResult =
-    document.getElementById("emptyResult");
+    const LEGACY_ACCOUNT_KEY =
+        "xcovibe-account";
 
 
-function getPosts() {
+    /* =====================================================
+       TOAST
+       ===================================================== */
 
-    return document.querySelectorAll(".post");
+    let toastTimer;
 
-}
+    function showToast(message) {
 
-
-function updateSearch() {
-
-    if (!searchInput) return;
-
-    const keyword =
-        searchInput.value
-            .toLowerCase()
-            .trim();
-
-    let visiblePosts = 0;
-
-
-    getPosts().forEach(function (post) {
-
-        const content =
-            post.textContent.toLowerCase();
-
-
-        if (content.includes(keyword)) {
-
-            post.style.display = "block";
-
-            visiblePosts++;
-
-        } else {
-
-            post.style.display = "none";
-
+        if (!toast || !toastMessage) {
+            return;
         }
 
-    });
+        clearTimeout(toastTimer);
+
+        toastMessage.textContent = message;
+
+        toast.classList.add("show");
+
+        toastTimer = setTimeout(function () {
+
+            toast.classList.remove("show");
+
+        }, 3000);
+
+    }
 
 
-    if (emptyResult) {
+    /* =====================================================
+       ACCOUNT STORAGE
+       ===================================================== */
 
-        if (visiblePosts === 0) {
+    function getAccounts() {
 
-            emptyResult.style.display = "block";
+        const saved =
+            localStorage.getItem(ACCOUNTS_KEY);
 
-        } else {
+        if (!saved) {
+            return [];
+        }
 
-            emptyResult.style.display = "none";
+        try {
+
+            const accounts =
+                JSON.parse(saved);
+
+            return Array.isArray(accounts)
+                ? accounts
+                : [];
+
+        } catch (error) {
+
+            return [];
 
         }
 
     }
 
-}
+
+    function saveAccounts(accounts) {
+
+        localStorage.setItem(
+            ACCOUNTS_KEY,
+            JSON.stringify(accounts)
+        );
+
+    }
 
 
-if (searchInput) {
+    /*
+       MIGRASI SISTEM LAMA
 
-    searchInput.addEventListener(
-        "input",
-        updateSearch
-    );
+       Kalau sebelumnya ada:
+       xcovibe-account
 
-}
+       akun tersebut dipindahkan
+       ke sistem multi-account.
+    */
 
+    function migrateOldAccount() {
 
-/* =========================================================
-   COMMUNITY FILTER
-   ========================================================= */
-
-const communityButtons =
-    document.querySelectorAll(
-        ".community-item"
-    );
-
-
-communityButtons.forEach(function (button) {
-
-    button.addEventListener(
-        "click",
-        function () {
-
-            communityButtons.forEach(
-                function (item) {
-
-                    item.classList.remove(
-                        "active"
-                    );
-
-                }
+        const oldAccount =
+            localStorage.getItem(
+                LEGACY_ACCOUNT_KEY
             );
 
-
-            this.classList.add("active");
-
-
-            const category =
-                this.dataset.category;
-
-
-            let visiblePosts = 0;
-
-
-            getPosts().forEach(
-                function (post) {
-
-                    const postCategory =
-                        post.dataset.category;
-
-
-                    if (
-                        category === "all" ||
-                        postCategory === category
-                    ) {
-
-                        post.style.display =
-                            "block";
-
-                        visiblePosts++;
-
-                    } else {
-
-                        post.style.display =
-                            "none";
-
-                    }
-
-                }
-            );
-
-
-            if (emptyResult) {
-
-                if (visiblePosts === 0) {
-
-                    emptyResult.style.display =
-                        "block";
-
-                } else {
-
-                    emptyResult.style.display =
-                        "none";
-
-                }
-
-            }
-
+        if (!oldAccount) {
+            return;
         }
-    );
 
-});
+        try {
 
-
-/* =========================================================
-   ACCOUNT DATA
-   ========================================================= */
-
-function getAccount() {
-
-    const account =
-        localStorage.getItem(
-            "xcovibe-account"
-        );
-
-
-    if (!account) {
-
-        return null;
-
-    }
-
-
-    try {
-
-        return JSON.parse(account);
-
-    } catch (error) {
-
-        return null;
-
-    }
-
-}
-
-
-function isLoggedIn() {
-
-    const account =
-        getAccount();
-
-
-    const session =
-        localStorage.getItem(
-            "xcovibe-logged-in"
-        );
-
-
-    return (
-        account !== null &&
-        session === "true"
-    );
-
-}
-
-
-/* =========================================================
-   TOAST
-   ========================================================= */
-
-const toast =
-    document.getElementById("toast");
-
-const toastMessage =
-    document.getElementById(
-        "toastMessage"
-    );
-
-let toastTimer;
-
-
-function showToast(message) {
-
-    if (!toast || !toastMessage) return;
-
-
-    clearTimeout(toastTimer);
-
-
-    toastMessage.textContent =
-        message;
-
-
-    toast.classList.add("show");
-
-
-    toastTimer =
-        setTimeout(
-            function () {
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            3000
-        );
-
-}
-
-
-/* =========================================================
-   LIKE
-   ========================================================= */
-
-function activateLikeButton(button) {
-
-    if (!button) return;
-
-
-    button.addEventListener(
-        "click",
-        function () {
-
-            this.classList.toggle(
-                "liked"
-            );
-
-
-            const count =
-                this.querySelector(
-                    "span"
-                );
-
-
-            if (!count) return;
-
-
-            let number =
-                parseInt(
-                    count.textContent,
-                    10
-                ) || 0;
-
+            const account =
+                JSON.parse(oldAccount);
 
             if (
-                this.classList.contains(
-                    "liked"
-                )
+                !account ||
+                !account.username ||
+                !account.email ||
+                !account.password
             ) {
+                return;
+            }
 
-                number++;
+            const accounts =
+                getAccounts();
 
+            const alreadyExists =
+                accounts.some(function (item) {
 
-                this.firstChild.textContent =
-                    "♥ ";
-
-            } else {
-
-                number =
-                    Math.max(
-                        0,
-                        number - 1
+                    return (
+                        item.username.toLowerCase() ===
+                        account.username.toLowerCase()
                     );
 
+                });
 
-                this.firstChild.textContent =
-                    "♡ ";
+            if (!alreadyExists) {
 
-            }
+                accounts.push({
+                    username: account.username,
+                    email: account.email,
+                    password: account.password
+                });
 
-
-            count.textContent =
-                number;
-
-        }
-    );
-
-}
-
-
-document
-    .querySelectorAll(".like-btn")
-    .forEach(
-        activateLikeButton
-    );
-
-
-/* =========================================================
-   SORT
-   ========================================================= */
-
-const sortButton =
-    document.getElementById(
-        "sortBtn"
-    );
-
-
-if (sortButton) {
-
-    sortButton.addEventListener(
-        "click",
-        function () {
-
-            if (
-                this.textContent.includes(
-                    "Latest"
-                )
-            ) {
-
-                this.textContent =
-                    "Popular ↓";
-
-            } else {
-
-                this.textContent =
-                    "Latest ↓";
+                saveAccounts(accounts);
 
             }
 
+        } catch (error) {
+
+            console.log(
+                "Migrasi akun lama gagal."
+            );
+
         }
-    );
 
-}
-
-
-/* =========================================================
-   ACCOUNT REQUIRED MODAL
-   ========================================================= */
-
-const accountModal =
-    document.getElementById(
-        "accountModal"
-    );
+    }
 
 
-const closeAccountModal =
-    document.getElementById(
-        "closeAccountModal"
-    );
+    migrateOldAccount();
 
 
-const accountLoginBtn =
-    document.getElementById(
-        "accountLoginBtn"
-    );
+    /* =====================================================
+       CURRENT USER
+       ===================================================== */
+
+    function getCurrentUsername() {
+
+        return localStorage.getItem(
+            CURRENT_USER_KEY
+        );
+
+    }
 
 
-const accountRegisterBtn =
-    document.getElementById(
-        "accountRegisterBtn"
-    );
+    function getCurrentAccount() {
+
+        const username =
+            getCurrentUsername();
+
+        if (!username) {
+            return null;
+        }
+
+        const accounts =
+            getAccounts();
+
+        return accounts.find(function (account) {
+
+            return (
+                account.username.toLowerCase() ===
+                username.toLowerCase()
+            );
+
+        }) || null;
+
+    }
 
 
-function openAccountModal() {
+    function isLoggedIn() {
 
-    if (!accountModal) return;
+        return (
+            localStorage.getItem(
+                LOGGED_IN_KEY
+            ) === "true" &&
+            getCurrentAccount() !== null
+        );
 
-
-    accountModal.classList.add(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
-
-}
+    }
 
 
-function closeAccountChoice() {
+    /* =====================================================
+       LOGIN SESSION
+       ===================================================== */
 
-    if (!accountModal) return;
+    function loginAccount(account) {
+
+        localStorage.setItem(
+            CURRENT_USER_KEY,
+            account.username
+        );
+
+        localStorage.setItem(
+            LOGGED_IN_KEY,
+            "true"
+        );
+
+        updateAuthDisplay();
+
+    }
 
 
-    accountModal.classList.remove(
-        "active"
-    );
+    function logoutAccount() {
+
+        localStorage.removeItem(
+            CURRENT_USER_KEY
+        );
+
+        localStorage.removeItem(
+            LOGGED_IN_KEY
+        );
+
+        updateAuthDisplay();
+
+        showToast(
+            "Kamu telah logout."
+        );
+
+    }
 
 
-    document.body.style.overflow =
-        "";
+    /* =====================================================
+       MODAL HELPER
+       ===================================================== */
 
-}
+    function openModal(modal) {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.add("active");
+
+        document.body.style.overflow =
+            "hidden";
+
+    }
 
 
-if (closeAccountModal) {
+    function closeModalWindow(modal) {
+
+        if (!modal) {
+            return;
+        }
+
+        modal.classList.remove("active");
+
+        document.body.style.overflow =
+            "";
+
+    }
+
+
+    /* =====================================================
+       ACCOUNT CHOICE
+       ===================================================== */
+
+    function openAccountChoice() {
+
+        openModal(accountModal);
+
+    }
+
+
+    function closeAccountChoice() {
+
+        closeModalWindow(
+            accountModal
+        );
+
+    }
+
 
     closeAccountModal.addEventListener(
         "click",
         closeAccountChoice
     );
 
-}
-
-
-if (accountModal) {
 
     accountModal.addEventListener(
         "click",
@@ -494,116 +392,484 @@ if (accountModal) {
         }
     );
 
-}
+
+    /* =====================================================
+       LOGIN MODAL
+       ===================================================== */
+
+    let loginModal = null;
+
+    let loginForm = null;
+
+    let loginIdentifier = null;
+
+    let loginPassword = null;
 
 
-/* =========================================================
-   REGISTER MODAL
-   ========================================================= */
+    function createLoginModal() {
 
-const registerButton =
-    document.querySelector(
-        ".register-btn"
-    );
+        if (
+            document.getElementById(
+                "loginModal"
+            )
+        ) {
 
+            loginModal =
+                document.getElementById(
+                    "loginModal"
+                );
 
-const registerModal =
-    document.getElementById(
-        "registerModal"
-    );
+            loginForm =
+                document.getElementById(
+                    "loginForm"
+                );
 
+            loginIdentifier =
+                document.getElementById(
+                    "loginIdentifier"
+                );
 
-const closeRegister =
-    document.getElementById(
-        "closeRegister"
-    );
+            loginPassword =
+                document.getElementById(
+                    "loginPassword"
+                );
 
+            return;
 
-const cancelRegister =
-    document.getElementById(
-        "cancelRegister"
-    );
-
-
-const registerForm =
-    document.getElementById(
-        "registerForm"
-    );
-
-
-function openRegisterModal() {
-
-    if (!registerModal) return;
+        }
 
 
-    registerModal.classList.add(
-        "active"
-    );
+        loginModal =
+            document.createElement("div");
+
+        loginModal.className =
+            "modal-overlay";
+
+        loginModal.id =
+            "loginModal";
+
+        loginModal.innerHTML = `
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <div>
+                        <span class="section-label">
+                            WELCOME BACK
+                        </span>
+
+                        <h2>
+                            Login to XCOVIBE
+                        </h2>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="modal-close"
+                        id="closeLogin"
+                        aria-label="Close"
+                    >
+                        &times;
+                    </button>
+
+                </div>
+
+                <p style="
+                    margin: 0 0 18px;
+                    color: var(--text-soft);
+                ">
+                    Masuk kembali dan lanjutkan vibe kamu.
+                </p>
+
+                <form id="loginForm">
+
+                    <label for="loginIdentifier">
+                        Username atau Email
+                    </label>
+
+                    <input
+                        type="text"
+                        id="loginIdentifier"
+                        placeholder="Username atau email"
+                        autocomplete="username"
+                        required
+                    >
+
+                    <label for="loginPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="Masukkan password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <div class="modal-actions">
+
+                        <button
+                            type="button"
+                            class="cancel-btn"
+                            id="cancelLogin"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="publish-btn"
+                        >
+                            Login
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        `;
+
+        document.body.appendChild(
+            loginModal
+        );
 
 
-    document.body.style.overflow =
-        "hidden";
+        loginForm =
+            document.getElementById(
+                "loginForm"
+            );
+
+        loginIdentifier =
+            document.getElementById(
+                "loginIdentifier"
+            );
+
+        loginPassword =
+            document.getElementById(
+                "loginPassword"
+            );
 
 
-    setTimeout(
+        document
+            .getElementById("closeLogin")
+            .addEventListener(
+                "click",
+                closeLoginModal
+            );
+
+
+        document
+            .getElementById("cancelLogin")
+            .addEventListener(
+                "click",
+                closeLoginModal
+            );
+
+
+        loginModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    loginModal
+                ) {
+
+                    closeLoginModal();
+
+                }
+
+            }
+        );
+
+
+        loginForm.addEventListener(
+            "submit",
+            handleLogin
+        );
+
+    }
+
+
+    function openLoginModal(identifier) {
+
+        createLoginModal();
+
+        closeAccountChoice();
+
+        openModal(loginModal);
+
+        if (identifier) {
+
+            loginIdentifier.value =
+                identifier;
+
+        }
+
+        setTimeout(function () {
+
+            loginIdentifier.focus();
+
+        }, 100);
+
+    }
+
+
+    function closeLoginModal() {
+
+        closeModalWindow(
+            loginModal
+        );
+
+    }
+
+
+    /* =====================================================
+       LOGIN PROCESS
+       ===================================================== */
+
+    function handleLogin(event) {
+
+        event.preventDefault();
+
+        const identifier =
+            loginIdentifier.value.trim();
+
+        const password =
+            loginPassword.value;
+
+
+        if (
+            !identifier ||
+            !password
+        ) {
+
+            showToast(
+                "Username/email dan password wajib diisi."
+            );
+
+            return;
+
+        }
+
+
+        const accounts =
+            getAccounts();
+
+
+        const account =
+            accounts.find(function (item) {
+
+                return (
+                    item.username.toLowerCase() ===
+                    identifier.toLowerCase() ||
+                    item.email.toLowerCase() ===
+                    identifier.toLowerCase()
+                );
+
+            });
+
+
+        /*
+           AKUN TIDAK DITEMUKAN
+           -> REGISTER
+        */
+
+        if (!account) {
+
+            closeLoginModal();
+
+            showToast(
+                "Akun belum terdaftar. Silakan Register."
+            );
+
+            setTimeout(function () {
+
+                openRegisterModal(
+                    identifier
+                );
+
+            }, 350);
+
+            return;
+
+        }
+
+
+        /*
+           PASSWORD SALAH
+        */
+
+        if (
+            account.password !==
+            password
+        ) {
+
+            showToast(
+                "Password salah. Silakan coba lagi."
+            );
+
+            loginPassword.value = "";
+
+            loginPassword.focus();
+
+            return;
+
+        }
+
+
+        /*
+           LOGIN BERHASIL
+        */
+
+        loginAccount(account);
+
+        closeLoginModal();
+
+        loginForm.reset();
+
+        showToast(
+            "Selamat datang kembali, @" +
+            account.username +
+            "!"
+        );
+
+    }
+
+
+    /* =====================================================
+       TOP LOGIN BUTTON
+       ===================================================== */
+
+    loginButton.addEventListener(
+        "click",
         function () {
+
+            if (isLoggedIn()) {
+
+                const account =
+                    getCurrentAccount();
+
+                showToast(
+                    "Kamu sedang login sebagai @" +
+                    account.username
+                );
+
+                return;
+
+            }
+
+            openLoginModal();
+
+        }
+    );
+
+
+    /* =====================================================
+       REGISTER MODAL
+       ===================================================== */
+
+    function openRegisterModal(prefill) {
+
+        closeAccountChoice();
+
+        openModal(registerModal);
+
+        if (prefill) {
 
             const usernameInput =
                 document.getElementById(
                     "registerUsername"
                 );
 
+            const emailInput =
+                document.getElementById(
+                    "registerEmail"
+                );
 
-            if (usernameInput) {
 
-                usernameInput.focus();
+            /*
+               Kalau input terlihat seperti email,
+               masukkan ke email.
+            */
+
+            if (
+                prefill.includes("@")
+            ) {
+
+                emailInput.value =
+                    prefill;
+
+            } else {
+
+                usernameInput.value =
+                    prefill;
 
             }
 
-        },
-        100
+        }
+
+        setTimeout(function () {
+
+            document
+                .getElementById(
+                    "registerUsername"
+                )
+                .focus();
+
+        }, 100);
+
+    }
+
+
+    registerButton.addEventListener(
+        "click",
+        function () {
+
+            /*
+               Kalau sedang login,
+               tombol ini menjadi LOGOUT.
+            */
+
+            if (isLoggedIn()) {
+
+                logoutAccount();
+
+                return;
+
+            }
+
+            openRegisterModal();
+
+        }
     );
 
-}
-
-
-function closeRegisterModal() {
-
-    if (!registerModal) return;
-
-
-    registerModal.classList.remove(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "";
-
-}
-
-
-if (closeRegister) {
 
     closeRegister.addEventListener(
         "click",
-        closeRegisterModal
+        function () {
+
+            closeModalWindow(
+                registerModal
+            );
+
+        }
     );
 
-}
-
-
-if (cancelRegister) {
 
     cancelRegister.addEventListener(
         "click",
-        closeRegisterModal
+        function () {
+
+            closeModalWindow(
+                registerModal
+            );
+
+        }
     );
 
-}
-
-
-if (registerModal) {
 
     registerModal.addEventListener(
         "click",
@@ -614,497 +880,47 @@ if (registerModal) {
                 registerModal
             ) {
 
-                closeRegisterModal();
+                closeModalWindow(
+                    registerModal
+                );
 
             }
 
         }
     );
 
-}
+
+    /* =====================================================
+       ACCOUNT CHOICE -> LOGIN
+       ===================================================== */
+
+    accountLoginBtn.addEventListener(
+        "click",
+        function () {
+
+            openLoginModal();
+
+        }
+    );
 
 
-/* =========================================================
-   ACCOUNT MODAL -> REGISTER
-   ========================================================= */
-
-if (accountRegisterBtn) {
+    /* =====================================================
+       ACCOUNT CHOICE -> REGISTER
+       ===================================================== */
 
     accountRegisterBtn.addEventListener(
         "click",
         function () {
-
-            closeAccountChoice();
 
             openRegisterModal();
 
         }
     );
 
-}
-
-
-/* =========================================================
-   LOGIN MODAL
-   Dibuat otomatis oleh JavaScript
-   ========================================================= */
-
-let loginModal = null;
-
-
-function createLoginModal() {
-
-    const existingModal =
-        document.getElementById(
-            "loginModal"
-        );
-
-
-    if (existingModal) {
-
-        loginModal =
-            existingModal;
-
-        return loginModal;
-
-    }
-
-
-    loginModal =
-        document.createElement(
-            "div"
-        );
-
-
-    loginModal.id =
-        "loginModal";
-
-
-    loginModal.className =
-        "modal-overlay";
-
-
-    loginModal.innerHTML = `
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-
-                <div>
-
-                    <span class="section-label">
-                        XCOVIBE
-                    </span>
-
-                    <h2>
-                        Login to XCOVIBE
-                    </h2>
-
-                    <p class="login-subtitle">
-                        Masuk kembali dan lanjutkan vibe kamu.
-                    </p>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    id="closeLogin"
-                    aria-label="Tutup login"
-                >
-                    &times;
-                </button>
-
-            </div>
-
-
-            <form id="loginForm">
-
-                <label for="loginIdentifier">
-                    Username atau Email
-                </label>
-
-
-                <input
-                    type="text"
-                    id="loginIdentifier"
-                    placeholder="Username atau email"
-                    autocomplete="username"
-                    required
-                >
-
-
-                <label for="loginPassword">
-                    Password
-                </label>
-
-
-                <input
-                    type="password"
-                    id="loginPassword"
-                    placeholder="Masukkan password"
-                    autocomplete="current-password"
-                    required
-                >
-
-
-                <div class="modal-actions">
-
-                    <button
-                        type="button"
-                        class="cancel-btn"
-                        id="cancelLogin"
-                    >
-                        Cancel
-                    </button>
-
-
-                    <button
-                        type="submit"
-                        class="publish-btn"
-                    >
-                        Login
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    `;
-
-
-    document.body.appendChild(
-        loginModal
-    );
-
 
     /* =====================================================
-       LOGIN CLOSE BUTTON
-       X
+       REGISTER PROCESS
        ===================================================== */
-
-    const closeLogin =
-        document.getElementById(
-            "closeLogin"
-        );
-
-
-    if (closeLogin) {
-
-        closeLogin.onclick =
-            function (event) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                closeLoginModal();
-
-            };
-
-    }
-
-
-    /* =====================================================
-       LOGIN CANCEL BUTTON
-       ===================================================== */
-
-    const cancelLogin =
-        document.getElementById(
-            "cancelLogin"
-        );
-
-
-    if (cancelLogin) {
-
-        cancelLogin.onclick =
-            function (event) {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                closeLoginModal();
-
-            };
-
-    }
-
-
-    /* =====================================================
-       CLICK OUTSIDE LOGIN
-       ===================================================== */
-
-    loginModal.onclick =
-        function (event) {
-
-            if (
-                event.target ===
-                loginModal
-            ) {
-
-                closeLoginModal();
-
-            }
-
-        };
-
-
-    /* =====================================================
-       LOGIN FORM
-       ===================================================== */
-
-    const loginForm =
-        document.getElementById(
-            "loginForm"
-        );
-
-
-    if (loginForm) {
-
-        loginForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-
-                const identifier =
-                    document
-                        .getElementById(
-                            "loginIdentifier"
-                        )
-                        .value
-                        .trim()
-                        .toLowerCase();
-
-
-                const password =
-                    document
-                        .getElementById(
-                            "loginPassword"
-                        )
-                        .value;
-
-
-                const account =
-                    getAccount();
-
-
-                /*
-                   BELUM ADA AKUN
-                */
-
-                if (!account) {
-
-                    closeLoginModal();
-
-                    openRegisterModal();
-
-                    showToast(
-                        "Belum punya akun. Silakan Register terlebih dahulu."
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                   CEK USERNAME
-                */
-
-                const usernameMatch =
-                    account.username &&
-                    account.username
-                        .toLowerCase() ===
-                    identifier;
-
-
-                /*
-                   CEK EMAIL
-                */
-
-                const emailMatch =
-                    account.email &&
-                    account.email
-                        .toLowerCase() ===
-                    identifier;
-
-
-                /*
-                   USERNAME / EMAIL SALAH
-                */
-
-                if (
-                    !usernameMatch &&
-                    !emailMatch
-                ) {
-
-                    showToast(
-                        "Username atau email tidak ditemukan."
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                   PASSWORD SALAH
-                */
-
-                if (
-                    account.password !==
-                    password
-                ) {
-
-                    showToast(
-                        "Password salah."
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                   LOGIN BERHASIL
-                */
-
-                localStorage.setItem(
-                    "xcovibe-logged-in",
-                    "true"
-                );
-
-
-                loginForm.reset();
-
-
-                closeLoginModal();
-
-
-                updateAuthDisplay();
-
-
-                showToast(
-                    "Login berhasil. Selamat datang, @" +
-                    account.username +
-                    "!"
-                );
-
-            }
-        );
-
-    }
-
-
-    return loginModal;
-
-}
-
-
-/* =========================================================
-   OPEN LOGIN
-   ========================================================= */
-
-function openLoginModal() {
-
-    const modal =
-        createLoginModal();
-
-
-    if (!modal) return;
-
-
-    closeAccountChoice();
-
-
-    modal.classList.add(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
-
-
-    setTimeout(
-        function () {
-
-            const input =
-                document.getElementById(
-                    "loginIdentifier"
-                );
-
-
-            if (input) {
-
-                input.focus();
-
-            }
-
-        },
-        100
-    );
-
-}
-
-
-/* =========================================================
-   CLOSE LOGIN
-   ========================================================= */
-
-function closeLoginModal() {
-
-    const modal =
-        document.getElementById(
-            "loginModal"
-        );
-
-
-    if (!modal) return;
-
-
-    modal.classList.remove(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "";
-
-}
-
-
-/* =========================================================
-   ACCOUNT MODAL -> LOGIN
-   ========================================================= */
-
-if (accountLoginBtn) {
-
-    accountLoginBtn.onclick =
-        function (event) {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            openLoginModal();
-
-        };
-
-}
-
-
-/* =========================================================
-   REGISTER PROCESS
-   ========================================================= */
-
-if (registerForm) {
 
     registerForm.addEventListener(
         "submit",
@@ -1147,7 +963,9 @@ if (registerForm) {
                     .value;
 
 
-            /* USERNAME */
+            /*
+               USERNAME
+            */
 
             if (
                 username.length < 3
@@ -1161,8 +979,6 @@ if (registerForm) {
 
             }
 
-
-            /* USERNAME FORMAT */
 
             const usernamePattern =
                 /^[a-zA-Z0-9_]+$/;
@@ -1183,7 +999,32 @@ if (registerForm) {
             }
 
 
-            /* PASSWORD */
+            /*
+               EMAIL
+            */
+
+            const emailPattern =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+            if (
+                !emailPattern.test(
+                    email
+                )
+            ) {
+
+                showToast(
+                    "Format email tidak valid."
+                );
+
+                return;
+
+            }
+
+
+            /*
+               PASSWORD
+            */
 
             if (
                 password.length < 6
@@ -1198,7 +1039,9 @@ if (registerForm) {
             }
 
 
-            /* CONFIRM PASSWORD */
+            /*
+               CONFIRM PASSWORD
+            */
 
             if (
                 password !==
@@ -1214,18 +1057,69 @@ if (registerForm) {
             }
 
 
-            /* CEK AKUN */
-
-            const existingAccount =
-                getAccount();
+            const accounts =
+                getAccounts();
 
 
-            if (
-                existingAccount
-            ) {
+            /*
+               CEK USERNAME
+            */
+
+            const usernameExists =
+                accounts.find(function (account) {
+
+                    return (
+                        account.username.toLowerCase() ===
+                        username.toLowerCase()
+                    );
+
+                });
+
+
+            /*
+               USERNAME SUDAH ADA
+            */
+
+            if (usernameExists) {
+
+                /*
+                   Username + password sama
+                   -> langsung login
+                */
+
+                if (
+                    usernameExists.password ===
+                    password
+                ) {
+
+                    loginAccount(
+                        usernameExists
+                    );
+
+                    registerForm.reset();
+
+                    closeModalWindow(
+                        registerModal
+                    );
+
+                    showToast(
+                        "Akun ditemukan. Kamu langsung login sebagai @" +
+                        usernameExists.username +
+                        "."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                   Username sama,
+                   password berbeda
+                */
 
                 showToast(
-                    "Akun sudah terdaftar di browser ini."
+                    "Username sudah terdaftar. Silakan Login."
                 );
 
                 return;
@@ -1233,54 +1127,71 @@ if (registerForm) {
             }
 
 
-            /* CREATE ACCOUNT */
+            /*
+               CEK EMAIL
+            */
 
-            const account = {
+            const emailExists =
+                accounts.find(function (account) {
 
-                username:
-                    username,
+                    return (
+                        account.email.toLowerCase() ===
+                        email.toLowerCase()
+                    );
 
-                email:
-                    email,
+                });
 
-                password:
-                    password
+
+            if (emailExists) {
+
+                showToast(
+                    "Email sudah terdaftar. Silakan gunakan email lain."
+                );
+
+                return;
+
+            }
+
+
+            /*
+               BUAT AKUN BARU
+            */
+
+            const newAccount = {
+
+                username: username,
+
+                email: email,
+
+                password: password
 
             };
 
 
-            localStorage.setItem(
-                "xcovibe-account",
-                JSON.stringify(
-                    account
-                )
+            accounts.push(
+                newAccount
             );
 
 
-            localStorage.setItem(
-                "xcovibe-username",
-                username
+            saveAccounts(
+                accounts
             );
 
 
             /*
-               REGISTER LANGSUNG
-               DIANGGAP LOGIN
+               REGISTER LANGSUNG LOGIN
             */
 
-            localStorage.setItem(
-                "xcovibe-logged-in",
-                "true"
+            loginAccount(
+                newAccount
             );
 
 
             registerForm.reset();
 
-
-            closeRegisterModal();
-
-
-            updateAuthDisplay();
+            closeModalWindow(
+                registerModal
+            );
 
 
             showToast(
@@ -1292,275 +1203,64 @@ if (registerForm) {
         }
     );
 
-}
 
-
-/* =========================================================
-   TOP LOGIN BUTTON
-   ========================================================= */
-
-const loginButton =
-    document.querySelector(
-        ".login-btn"
-    );
-
-
-if (loginButton) {
-
-    loginButton.addEventListener(
-        "click",
-        function () {
-
-            /*
-               SUDAH LOGIN
-            */
-
-            if (
-                isLoggedIn()
-            ) {
-
-                const account =
-                    getAccount();
-
-
-                showToast(
-                    "Kamu sedang login sebagai @" +
-                    account.username +
-                    "."
-                );
-
-                return;
-
-            }
-
-
-            /*
-               BELUM ADA AKUN
-            */
-
-            const account =
-                getAccount();
-
-
-            if (!account) {
-
-                openRegisterModal();
-
-
-                showToast(
-                    "Belum punya akun? Silakan Register terlebih dahulu."
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-               SUDAH PUNYA AKUN
-               TAPI BELUM LOGIN
-            */
-
-            openLoginModal();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   REGISTER / LOGOUT BUTTON
-   ========================================================= */
-
-if (registerButton) {
-
-    registerButton.addEventListener(
-        "click",
-        function () {
-
-            /*
-               LOGOUT
-            */
-
-            if (
-                registerButton.classList.contains(
-                    "logout-mode"
-                )
-            ) {
-
-                localStorage.removeItem(
-                    "xcovibe-logged-in"
-                );
-
-
-                updateAuthDisplay();
-
-
-                showToast(
-                    "Kamu telah logout."
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-               REGISTER
-            */
-
-            openRegisterModal();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CREATE DISCUSSION
-   ========================================================= */
-
-const createButton =
-    document.querySelector(
-        ".create-btn"
-    );
-
-
-const createModal =
-    document.getElementById(
-        "createModal"
-    );
-
-
-const closeModal =
-    document.getElementById(
-        "closeModal"
-    );
-
-
-const cancelModal =
-    document.getElementById(
-        "cancelModal"
-    );
-
-
-const createForm =
-    document.getElementById(
-        "createForm"
-    );
-
-
-/* OPEN CREATE */
-
-if (createButton) {
+    /* =====================================================
+       CREATE DISCUSSION
+       ===================================================== */
 
     createButton.addEventListener(
         "click",
         function () {
 
-            /*
-               BELUM LOGIN
-               -> JOIN XCOVIBE
-            */
+            if (!isLoggedIn()) {
 
-            if (
-                !isLoggedIn()
-            ) {
-
-                openAccountModal();
+                openAccountChoice();
 
                 return;
 
             }
 
-
-            /*
-               SUDAH LOGIN
-               -> CREATE DISCUSSION
-            */
-
-            if (!createModal) return;
-
-
-            createModal.classList.add(
-                "active"
+            openModal(
+                createModal
             );
 
+            setTimeout(function () {
 
-            document.body.style.overflow =
-                "hidden";
+                document
+                    .getElementById(
+                        "postTitle"
+                    )
+                    .focus();
+
+            }, 100);
+
+        }
+    );
 
 
-            setTimeout(
-                function () {
+    closeModal.addEventListener(
+        "click",
+        function () {
 
-                    const titleInput =
-                        document.getElementById(
-                            "postTitle"
-                        );
-
-
-                    if (titleInput) {
-
-                        titleInput.focus();
-
-                    }
-
-                },
-                100
+            closeModalWindow(
+                createModal
             );
 
         }
     );
 
-}
-
-
-/* CLOSE CREATE */
-
-function closeCreateModal() {
-
-    if (!createModal) return;
-
-
-    createModal.classList.remove(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "";
-
-}
-
-
-if (closeModal) {
-
-    closeModal.addEventListener(
-        "click",
-        closeCreateModal
-    );
-
-}
-
-
-if (cancelModal) {
 
     cancelModal.addEventListener(
         "click",
-        closeCreateModal
+        function () {
+
+            closeModalWindow(
+                createModal
+            );
+
+        }
     );
 
-}
-
-
-/* CLICK OUTSIDE CREATE */
-
-if (createModal) {
 
     createModal.addEventListener(
         "click",
@@ -1571,21 +1271,19 @@ if (createModal) {
                 createModal
             ) {
 
-                closeCreateModal();
+                closeModalWindow(
+                    createModal
+                );
 
             }
 
         }
     );
 
-}
 
-
-/* =========================================================
-   CREATE POST
-   ========================================================= */
-
-if (createForm) {
+    /* =====================================================
+       CREATE POST
+       ===================================================== */
 
     createForm.addEventListener(
         "submit",
@@ -1594,17 +1292,13 @@ if (createForm) {
             event.preventDefault();
 
 
-            /*
-               PENGAMAN LOGIN
-            */
+            if (!isLoggedIn()) {
 
-            if (
-                !isLoggedIn()
-            ) {
+                closeModalWindow(
+                    createModal
+                );
 
-                closeCreateModal();
-
-                openAccountModal();
+                openAccountChoice();
 
                 return;
 
@@ -1637,10 +1331,6 @@ if (createForm) {
                     .trim();
 
 
-            /*
-               VALIDASI
-            */
-
             if (
                 !title ||
                 !content
@@ -1656,37 +1346,25 @@ if (createForm) {
 
 
             const account =
-                getAccount();
+                getCurrentAccount();
 
 
             if (!account) {
-
-                closeCreateModal();
-
-                openAccountModal();
 
                 return;
 
             }
 
 
-            const username =
-                account.username;
-
-
             const categoryNames = {
 
-                general:
-                    "General",
+                general: "General",
 
-                gaming:
-                    "Gaming",
+                gaming: "Gaming",
 
-                technology:
-                    "Technology",
+                technology: "Technology",
 
-                creative:
-                    "Creative"
+                creative: "Creative"
 
             };
 
@@ -1694,19 +1372,14 @@ if (createForm) {
             const categoryName =
                 categoryNames[
                     category
-                ] ||
-                "General";
+                ];
 
 
             const avatar =
-                username
+                account.username
                     .charAt(0)
                     .toUpperCase();
 
-
-            /*
-               CREATE ARTICLE
-            */
 
             const newPost =
                 document.createElement(
@@ -1735,71 +1408,55 @@ if (createForm) {
                         <div>
 
                             <strong>
-                                ${escapeHTML(username)}
+                                ${escapeHTML(account.username)}
                             </strong>
 
                             <span>
-                                ${escapeHTML(categoryName)}
-                                · just now
+                                ${categoryName} · just now
                             </span>
 
                         </div>
 
                     </div>
 
-
                     <button
-                        type="button"
                         class="more-btn"
+                        type="button"
                     >
                         •••
                     </button>
 
                 </div>
 
-
                 <h2>
                     ${escapeHTML(title)}
                 </h2>
-
 
                 <p>
                     ${escapeHTML(content)}
                 </p>
 
-
                 <div class="post-actions">
 
                     <button
-                        type="button"
                         class="like-btn"
+                        type="button"
                     >
-
                         ♡
-
-                        <span>
-                            0
-                        </span>
-
+                        <span>0</span>
                     </button>
 
-
                     <button
-                        type="button"
                         class="comment-btn"
+                        type="button"
                     >
-
                         💬
-
-                        <span>
-                            0
-                        </span>
-
+                        <span>0</span>
                     </button>
-
 
                     <button
                         type="button"
+                        class="share-btn"
                     >
                         ↗ Share
                     </button>
@@ -1821,56 +1478,11 @@ if (createForm) {
                 );
 
 
-            if (!feed) {
-
-                showToast(
-                    "Feed tidak ditemukan."
-                );
-
-                return;
-
-            }
-
-
-            const empty =
-                document.getElementById(
-                    "emptyResult"
-                );
-
-
-            /*
-               MASUKKAN POST
-            */
-
-            if (empty) {
-
-                feed.insertBefore(
-                    newPost,
-                    empty
-                );
-
-            } else if (
-                feedHeader &&
+            feed.insertBefore(
+                newPost,
                 feedHeader.nextElementSibling
-            ) {
+            );
 
-                feed.insertBefore(
-                    newPost,
-                    feedHeader.nextElementSibling
-                );
-
-            } else {
-
-                feed.appendChild(
-                    newPost
-                );
-
-            }
-
-
-            /*
-               AKTIFKAN LIKE
-            */
 
             activateLikeButton(
                 newPost.querySelector(
@@ -1879,10 +1491,19 @@ if (createForm) {
             );
 
 
+            activateCommentButton(
+                newPost.querySelector(
+                    ".comment-btn"
+                )
+            );
+
+
             createForm.reset();
 
 
-            closeCreateModal();
+            closeModalWindow(
+                createModal
+            );
 
 
             showToast(
@@ -1892,363 +1513,731 @@ if (createForm) {
         }
     );
 
-}
 
+    /* =====================================================
+       LIKE SYSTEM
+       ===================================================== */
 
-/* =========================================================
-   AUTH DISPLAY
-   ========================================================= */
+    function activateLikeButton(button) {
 
-function updateAuthDisplay() {
-
-    if (
-        !loginButton ||
-        !registerButton
-    ) {
-
-        return;
-
-    }
-
-
-    const account =
-        getAccount();
-
-
-    /*
-       LOGIN
-    */
-
-    if (
-        account &&
-        isLoggedIn()
-    ) {
-
-        loginButton.textContent =
-            "@" +
-            account.username;
-
-
-        loginButton.classList.add(
-            "logged-user"
-        );
-
-
-        registerButton.textContent =
-            "Logout";
-
-
-        registerButton.classList.add(
-            "logout-mode"
-        );
-
-    }
-
-
-    /*
-       LOGOUT
-    */
-
-    else {
-
-        loginButton.textContent =
-            "Login";
-
-
-        loginButton.classList.remove(
-            "logged-user"
-        );
-
-
-        registerButton.textContent =
-            "Register";
-
-
-        registerButton.classList.remove(
-            "logout-mode"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-   ========================================================= */
-
-function escapeHTML(text) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-
-    div.textContent =
-        text;
-
-
-    return div.innerHTML;
-
-}
-
-
-/* =========================================================
-   ESCAPE KEY
-   ========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function (event) {
+        if (!button) {
+            return;
+        }
 
         if (
-            event.key !== "Escape"
+            button.dataset.ready ===
+            "true"
+        ) {
+            return;
+        }
+
+        button.dataset.ready =
+            "true";
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                /*
+                   WAJIB LOGIN
+                */
+
+                if (!isLoggedIn()) {
+
+                    openAccountChoice();
+
+                    return;
+
+                }
+
+
+                this.classList.toggle(
+                    "liked"
+                );
+
+
+                const count =
+                    this.querySelector(
+                        "span"
+                    );
+
+
+                let number =
+                    parseInt(
+                        count.textContent
+                    ) || 0;
+
+
+                if (
+                    this.classList.contains(
+                        "liked"
+                    )
+                ) {
+
+                    number++;
+
+                    this.firstChild.textContent =
+                        "♥ ";
+
+                } else {
+
+                    number--;
+
+                    if (number < 0) {
+                        number = 0;
+                    }
+
+                    this.firstChild.textContent =
+                        "♡ ";
+
+                }
+
+
+                count.textContent =
+                    number;
+
+            }
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".like-btn"
+        )
+        .forEach(
+            activateLikeButton
+        );
+
+
+    /* =====================================================
+       COMMENT SYSTEM
+       ===================================================== */
+
+    function activateCommentButton(button) {
+
+        if (!button) {
+            return;
+        }
+
+        if (
+            button.dataset.ready ===
+            "true"
+        ) {
+            return;
+        }
+
+        button.dataset.ready =
+            "true";
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                if (!isLoggedIn()) {
+
+                    openAccountChoice();
+
+                    return;
+
+                }
+
+
+                const post =
+                    this.closest(
+                        ".post"
+                    );
+
+
+                if (!post) {
+                    return;
+                }
+
+
+                let commentBox =
+                    post.querySelector(
+                        ".xcovibe-comment-box"
+                    );
+
+
+                if (commentBox) {
+
+                    commentBox.classList.toggle(
+                        "active"
+                    );
+
+                    return;
+
+                }
+
+
+                commentBox =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                commentBox.className =
+                    "xcovibe-comment-box active";
+
+
+                commentBox.innerHTML = `
+
+                    <div style="
+                        display:flex;
+                        gap:8px;
+                        margin-top:14px;
+                    ">
+
+                        <input
+                            type="text"
+                            class="xcovibe-comment-input"
+                            placeholder="Tulis komentar..."
+                            maxlength="300"
+                            style="
+                                flex:1;
+                                padding:10px 12px;
+                                border:1px solid var(--border);
+                                border-radius:6px;
+                                background:var(--surface);
+                                color:var(--text);
+                                outline:none;
+                            "
+                        >
+
+                        <button
+                            type="button"
+                            class="publish-btn xcovibe-comment-submit"
+                        >
+                            Kirim
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="xcovibe-comments"
+                        style="
+                            margin-top:10px;
+                        "
+                    ></div>
+
+                `;
+
+
+                post
+                    .querySelector(
+                        ".post-actions"
+                    )
+                    .insertAdjacentElement(
+                        "afterend",
+                        commentBox
+                    );
+
+
+                const input =
+                    commentBox.querySelector(
+                        ".xcovibe-comment-input"
+                    );
+
+
+                const submit =
+                    commentBox.querySelector(
+                        ".xcovibe-comment-submit"
+                    );
+
+
+                submit.addEventListener(
+                    "click",
+                    function () {
+
+                        const text =
+                            input.value.trim();
+
+
+                        if (!text) {
+
+                            showToast(
+                                "Komentar tidak boleh kosong."
+                            );
+
+                            return;
+
+                        }
+
+
+                        const currentAccount =
+                            getCurrentAccount();
+
+
+                        const comment =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        comment.style.cssText = `
+                            padding:8px 0;
+                            border-bottom:1px solid var(--border);
+                        `;
+
+
+                        comment.innerHTML = `
+
+                            <strong>
+                                @${escapeHTML(
+                                    currentAccount.username
+                                )}
+                            </strong>
+
+                            <span style="
+                                color:var(--text-soft);
+                            ">
+                                ${escapeHTML(text)}
+                            </span>
+
+                        `;
+
+
+                        commentBox
+                            .querySelector(
+                                ".xcovibe-comments"
+                            )
+                            .appendChild(
+                                comment
+                            );
+
+
+                        input.value = "";
+
+
+                        showToast(
+                            "Komentar ditambahkan."
+                        );
+
+                    }
+                );
+
+
+                input.focus();
+
+            }
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".post-actions button:nth-child(2)"
+        )
+        .forEach(
+            activateCommentButton
+        );
+
+
+    /* =====================================================
+       SEARCH
+       ===================================================== */
+
+    function updateSearch() {
+
+        const keyword =
+            searchInput.value
+                .toLowerCase()
+                .trim();
+
+
+        let visiblePosts = 0;
+
+
+        document
+            .querySelectorAll(
+                ".post"
+            )
+            .forEach(
+                function (post) {
+
+                    const content =
+                        post.textContent
+                            .toLowerCase();
+
+
+                    if (
+                        content.includes(
+                            keyword
+                        )
+                    ) {
+
+                        post.style.display =
+                            "block";
+
+                        visiblePosts++;
+
+                    } else {
+
+                        post.style.display =
+                            "none";
+
+                    }
+
+                }
+            );
+
+
+        updateEmptyResult(
+            visiblePosts
+        );
+
+    }
+
+
+    searchInput.addEventListener(
+        "input",
+        updateSearch
+    );
+
+
+    /* =====================================================
+       COMMUNITY FILTER
+       ===================================================== */
+
+    const communityButtons =
+        document.querySelectorAll(
+            ".community-item"
+        );
+
+
+    communityButtons.forEach(
+        function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    communityButtons.forEach(
+                        function (item) {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    const category =
+                        this.dataset.category;
+
+
+                    let visiblePosts = 0;
+
+
+                    document
+                        .querySelectorAll(
+                            ".post"
+                        )
+                        .forEach(
+                            function (post) {
+
+                                const postCategory =
+                                    post.dataset.category;
+
+
+                                if (
+                                    category === "all" ||
+                                    postCategory === category
+                                ) {
+
+                                    post.style.display =
+                                        "block";
+
+                                    visiblePosts++;
+
+                                } else {
+
+                                    post.style.display =
+                                        "none";
+
+                                }
+
+                            }
+                        );
+
+
+                    updateEmptyResult(
+                        visiblePosts
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    function updateEmptyResult(
+        visiblePosts
+    ) {
+
+        if (
+            visiblePosts === 0
         ) {
 
-            return;
+            emptyResult.style.display =
+                "block";
+
+        } else {
+
+            emptyResult.style.display =
+                "none";
 
         }
 
+    }
 
-        /*
-           ACCOUNT MODAL
-        */
+
+    /* =====================================================
+       SORT
+       ===================================================== */
+
+    let popularMode = false;
+
+
+    sortButton.addEventListener(
+        "click",
+        function () {
+
+            popularMode =
+                !popularMode;
+
+
+            const feed =
+                document.querySelector(
+                    ".feed"
+                );
+
+
+            const posts =
+                Array.from(
+                    feed.querySelectorAll(
+                        ".post"
+                    )
+                );
+
+
+            if (popularMode) {
+
+                posts.sort(
+                    function (a, b) {
+
+                        const aLike =
+                            parseInt(
+                                a.querySelector(
+                                    ".like-btn span"
+                                ).textContent
+                            ) || 0;
+
+
+                        const bLike =
+                            parseInt(
+                                b.querySelector(
+                                    ".like-btn span"
+                                ).textContent
+                            ) || 0;
+
+
+                        return bLike - aLike;
+
+                    }
+                );
+
+
+                sortButton.textContent =
+                    "Popular ↓";
+
+            } else {
+
+                sortButton.textContent =
+                    "Latest ↓";
+
+
+                /*
+                   Post baru berada
+                   di bagian atas.
+                   Untuk post lama,
+                   kita kembalikan berdasarkan
+                   posisi data DOM.
+                */
+
+                posts.reverse();
+
+            }
+
+
+            posts.forEach(
+                function (post) {
+
+                    feed.appendChild(
+                        post
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       MOBILE SEARCH
+       ===================================================== */
+
+    const mobileSearch =
+        document.querySelector(
+            ".mobile-nav a:nth-child(3)"
+        );
+
+
+    if (mobileSearch) {
+
+        mobileSearch.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                searchInput.focus();
+
+                window.scrollTo({
+
+                    top: 0,
+
+                    behavior: "smooth"
+
+                });
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       ESCAPE HTML
+       ===================================================== */
+
+    function escapeHTML(text) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+        div.textContent =
+            text;
+
+        return div.innerHTML;
+
+    }
+
+
+    /* =====================================================
+       AUTH DISPLAY
+       ===================================================== */
+
+    function updateAuthDisplay() {
+
+        const account =
+            getCurrentAccount();
+
 
         if (
-            accountModal &&
-            accountModal.classList.contains(
-                "active"
-            )
+            isLoggedIn() &&
+            account
         ) {
+
+            loginButton.textContent =
+                "@" + account.username;
+
+
+            registerButton.textContent =
+                "Logout";
+
+
+            registerButton.classList.add(
+                "logout-mode"
+            );
+
+        } else {
+
+            loginButton.textContent =
+                "Login";
+
+
+            registerButton.textContent =
+                "Register";
+
+
+            registerButton.classList.remove(
+                "logout-mode"
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       ESCAPE KEY
+       ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key !==
+                "Escape"
+            ) {
+                return;
+            }
+
 
             closeAccountChoice();
 
-        }
-
-
-        /*
-           LOGIN MODAL
-        */
-
-        const currentLoginModal =
-            document.getElementById(
-                "loginModal"
-            );
-
-
-        if (
-            currentLoginModal &&
-            currentLoginModal.classList.contains(
-                "active"
-            )
-        ) {
-
             closeLoginModal();
 
-        }
-
-
-        /*
-           REGISTER MODAL
-        */
-
-        if (
-            registerModal &&
-            registerModal.classList.contains(
-                "active"
-            )
-        ) {
-
-            closeRegisterModal();
-
-        }
-
-
-        /*
-           CREATE MODAL
-        */
-
-        if (
-            createModal &&
-            createModal.classList.contains(
-                "active"
-            )
-        ) {
-
-            closeCreateModal();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   MOBILE SEARCH
-   ========================================================= */
-
-const mobileSearch =
-    document.querySelector(
-        ".mobile-nav a:nth-child(3)"
-    );
-
-
-if (
-    mobileSearch &&
-    searchInput
-) {
-
-    mobileSearch.addEventListener(
-        "click",
-        function (event) {
-
-            event.preventDefault();
-
-
-            searchInput.focus();
-
-
-            window.scrollTo({
-
-                top: 0,
-
-                behavior: "smooth"
-
-            });
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   COMMENT / REPLY
-   Belum login -> Join XCOVIBE
-   Sudah login -> sementara tampilkan toast
-   ========================================================= */
-
-document.addEventListener(
-    "click",
-    function (event) {
-
-        const commentButton =
-            event.target.closest(
-                ".comment-btn"
+            closeModalWindow(
+                registerModal
             );
 
-
-        if (!commentButton) return;
-
-
-        if (
-            !isLoggedIn()
-        ) {
-
-            event.preventDefault();
-
-            openAccountModal();
-
-            return;
+            closeModalWindow(
+                createModal
+            );
 
         }
+    );
 
 
-        showToast(
-            "Fitur balas diskusi sedang disiapkan."
-        );
+    /* =====================================================
+       INITIALIZE
+       ===================================================== */
 
-    }
-);
+    createLoginModal();
 
-
-/* =========================================================
-   INITIAL STATE
-   ========================================================= */
-
-updateAuthDisplay();
+    updateAuthDisplay();
 
 
-/*
-   Buat login modal saat halaman siap.
-   Ini tidak membuka popup,
-   hanya menyiapkan sistemnya.
-*/
-
-createLoginModal();
-/* =========================================================
-   LOGIN POPUP - CLOSE FIX
-   ========================================================= */
-
-function forceCloseLoginPopup() {
-    const loginModal = document.getElementById("loginModal");
-
-    if (!loginModal) return;
-
-    loginModal.classList.remove("active");
-    loginModal.style.display = "none";
-
-    document.body.style.overflow = "";
-}
-
-
-/* X */
-
-document.addEventListener("click", function (event) {
-
-    if (event.target.closest("#closeLogin")) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        forceCloseLoginPopup();
-
-    }
-
-});
-
-
-/* CANCEL */
-
-document.addEventListener("click", function (event) {
-
-    if (event.target.closest("#cancelLogin")) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        forceCloseLoginPopup();
-
-    }
-
-});
-
-
-/* KLIK DI LUAR FRAME */
-
-document.addEventListener("click", function (event) {
-
-    const loginModal =
-        document.getElementById("loginModal");
-
-    if (!loginModal) return;
-
-    if (event.target === loginModal) {
-
-        forceCloseLoginPopup();
-
-    }
-
-});
-
-
-/* ESC */
-
-document.addEventListener("keydown", function (event) {
-
-    if (event.key !== "Escape") return;
-
-    forceCloseLoginPopup();
+    console.log(
+        "XCOVIBE Community System aktif."
+    );
 
 });
