@@ -2435,3 +2435,312 @@ select {
     }
 
 }
+/* =========================================================
+   XCOVIBE — TRENDING PILLS
+   ========================================================= */
+
+.trending-section {
+    width: 100%;
+}
+
+.trending-section .side-heading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+
+/* CONTAINER */
+
+.trending-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+
+/* PILL */
+
+.trend-pill {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    width: 100%;
+    min-height: 42px;
+
+    padding: 8px 12px;
+
+    text-decoration: none;
+
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    color: var(--text);
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* ICON */
+
+.trend-icon {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+
+    border-radius: 50%;
+
+    font-size: 13px;
+}
+
+
+/* TEXT */
+
+.trend-pill span:last-child {
+    white-space: nowrap;
+}
+
+
+/* HOVER */
+
+.trend-pill:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+
+    transform: translateX(3px);
+
+    box-shadow:
+        0 5px 15px rgba(0, 87, 168, 0.16);
+}
+
+
+.trend-pill:hover .trend-icon {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .right-sidebar {
+        display: block;
+
+        position: static;
+
+        width: 100%;
+
+        margin-top: 5px;
+    }
+
+    .trending-pills {
+        display: flex;
+        flex-direction: row;
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+    }
+
+    .trend-pill {
+        width: auto;
+        min-width: 120px;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET KECIL
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+    .right-sidebar {
+        position: static;
+
+        width: 100%;
+
+        margin-top: 10px;
+    }
+
+    .right-sidebar .trending-section {
+        width: 100%;
+    }
+
+    .trending-pills {
+        display: flex;
+
+        flex-wrap: nowrap;
+
+        overflow-x: auto;
+
+        padding-bottom: 5px;
+
+        scrollbar-width: none;
+    }
+
+    .trending-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    .trend-pill {
+        flex: 0 0 auto;
+
+        min-width: 125px;
+
+        width: auto;
+
+        padding: 8px 13px;
+    }
+
+    /* ONLINE tetap ada tetapi lebih sederhana */
+
+    .online-section {
+        margin-top: 22px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 720px) {
+
+    .right-sidebar {
+        display: block;
+
+        position: static;
+
+        width: 100%;
+
+        margin-top: 25px;
+    }
+
+    .trending-section {
+        width: 100%;
+    }
+
+    .trending-section .side-heading {
+        font-size: 10px;
+
+        margin-bottom: 11px;
+    }
+
+    .trending-pills {
+        width: 100%;
+
+        display: flex;
+        flex-wrap: nowrap;
+
+        gap: 8px;
+
+        overflow-x: auto;
+
+        padding: 2px 2px 7px;
+
+        scrollbar-width: none;
+    }
+
+    .trending-pills::-webkit-scrollbar {
+        display: none;
+    }
+
+    .trend-pill {
+        flex: 0 0 auto;
+
+        width: auto;
+        min-width: 118px;
+
+        min-height: 39px;
+
+        padding: 7px 12px;
+
+        font-size: 11px;
+    }
+
+    .trend-icon {
+        width: 23px;
+        height: 23px;
+
+        font-size: 12px;
+    }
+
+    /* ONLINE */
+
+    .online-section {
+        margin-top: 25px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .right-sidebar {
+        margin-top: 22px;
+    }
+
+    .trend-pill {
+        min-width: 112px;
+
+        min-height: 37px;
+
+        padding: 6px 10px;
+
+        font-size: 10px;
+    }
+
+    .trend-icon {
+        width: 22px;
+        height: 22px;
+
+        font-size: 11px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+    .trend-pill {
+        min-width: 105px;
+
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+}
