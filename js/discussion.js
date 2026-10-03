@@ -1,287 +1,1159 @@
-window.XCOVIBE = window.XCOVIBE || {};
+/* =========================================================
+   XCOVIBE COMMUNITY
+   DISCUSSION / COMMENT / REPLY
+   ========================================================= */
 
-XCOVIBE.discussion = (() => {
 
-    function escapeHTML(text) {
+/* =========================================================
+   ACCOUNT
+   ========================================================= */
 
-        const div = document.createElement("div");
+function discussionGetAccount() {
 
-        div.textContent = text;
+    const data =
+        localStorage.getItem(
+            "xcovibe-account"
+        );
 
-        return div.innerHTML;
+    if (!data) {
+        return null;
+    }
+
+    try {
+
+        return JSON.parse(data);
+
+    } catch (error) {
+
+        return null;
 
     }
 
+}
 
-    function openCreateDiscussion() {
 
-        if (!XCOVIBE.account.isLoggedIn()) {
+function discussionIsLoggedIn() {
 
-            XCOVIBE.ui.openModal("accountModal");
+    return (
+        localStorage.getItem(
+            "xcovibe-logged-in"
+        ) === "true"
+        &&
+        discussionGetAccount() !== null
+    );
 
-            return;
+}
+
+
+/* =========================================================
+   LOGIN REQUIRED
+   ========================================================= */
+
+function requireDiscussionLogin() {
+
+    if (discussionIsLoggedIn()) {
+
+        return true;
+
+    }
+
+    if (
+        typeof openAccountModal ===
+        "function"
+    ) {
+
+        openAccountModal();
+
+    }
+
+    if (
+        typeof showToast ===
+        "function"
+    ) {
+
+        showToast(
+            "Silakan Login atau Register terlebih dahulu."
+        );
+
+    }
+
+    return false;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeDiscussionHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        text;
+
+    return div.innerHTML;
+
+}
+
+
+/* =========================================================
+   COMMENT STORAGE
+   ========================================================= */
+
+function getDiscussionComments() {
+
+    const data =
+        localStorage.getItem(
+            "xcovibe-comments"
+        );
+
+    if (!data) {
+
+        return {};
+
+    }
+
+    try {
+
+        return JSON.parse(data);
+
+    } catch (error) {
+
+        return {};
+
+    }
+
+}
+
+
+function saveDiscussionComments(
+    comments
+) {
+
+    localStorage.setItem(
+        "xcovibe-comments",
+        JSON.stringify(comments)
+    );
+
+}
+
+
+/* =========================================================
+   POST ID
+   ========================================================= */
+
+function getPostId(post) {
+
+    if (!post.dataset.postId) {
+
+        post.dataset.postId =
+            "post-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 8);
+
+    }
+
+    return post.dataset.postId;
+
+}
+
+
+/* =========================================================
+   FIND COMMENT BUTTON
+   ========================================================= */
+
+function getCommentButton(post) {
+
+    const buttons =
+        post.querySelectorAll(
+            ".post-actions button"
+        );
+
+
+    for (
+        let i = 0;
+        i < buttons.length;
+        i++
+    ) {
+
+        if (
+            buttons[i]
+                .textContent
+                .includes("💬")
+        ) {
+
+            return buttons[i];
+
         }
 
-        XCOVIBE.ui.openModal("createModal");
+    }
+
+    return null;
+
+}
+
+
+/* =========================================================
+   UPDATE COMMENT COUNT
+   ========================================================= */
+
+function updateCommentCount(post) {
+
+    const button =
+        getCommentButton(post);
+
+
+    if (!button) {
+
+        return;
 
     }
 
 
-    function closeCreateDiscussion() {
+    const count =
+        button.querySelector("span");
 
-        XCOVIBE.ui.closeModal("createModal");
+
+    if (!count) {
+
+        return;
 
     }
 
 
-    function createPost(event) {
-
-        event.preventDefault();
-
-
-        if (!XCOVIBE.account.isLoggedIn()) {
-
-            closeCreateDiscussion();
-
-            XCOVIBE.ui.openModal("accountModal");
-
-            return;
-        }
+    const postId =
+        getPostId(post);
 
 
-        const title =
-            document
-                .getElementById("postTitle")
-                .value
-                .trim();
-
-        const category =
-            document
-                .getElementById("postCategory")
-                .value;
-
-        const content =
-            document
-                .getElementById("postContent")
-                .value
-                .trim();
+    const comments =
+        getDiscussionComments();
 
 
-        if (!title || !content) {
+    const total =
+        comments[postId]
+            ? comments[postId].length
+            : 0;
 
-            XCOVIBE.ui.toast(
-                "Judul dan isi diskusi wajib diisi."
+
+    /*
+       Jumlah komentar hanya berdasarkan
+       komentar yang benar-benar dibuat.
+    */
+
+    count.textContent =
+        total;
+
+}
+
+
+/* =========================================================
+   CREATE COMMENT AREA
+   ========================================================= */
+
+function createCommentArea(post) {
+
+    if (
+        post.querySelector(
+            ".discussion-comments"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const postId =
+        getPostId(post);
+
+
+    const comments =
+        getDiscussionComments();
+
+
+    const postComments =
+        comments[postId] || [];
+
+
+    const container =
+        document.createElement("div");
+
+    container.className =
+        "discussion-comments";
+
+
+    container.innerHTML = `
+
+        <div class="comments-header">
+
+            <strong>
+                Comments
+            </strong>
+
+            <span class="comment-total">
+                ${postComments.length}
+            </span>
+
+        </div>
+
+
+        <div class="comment-list"></div>
+
+
+        <form class="comment-form">
+
+            <input
+                type="text"
+                class="comment-input"
+                placeholder="Tulis komentar..."
+                maxlength="500"
+                autocomplete="off"
+            >
+
+            <button
+                type="submit"
+                class="comment-submit"
+            >
+                Send
+            </button>
+
+        </form>
+
+    `;
+
+
+    const actions =
+        post.querySelector(
+            ".post-actions"
+        );
+
+
+    if (actions) {
+
+        actions.after(container);
+
+    }
+
+
+    renderComments(
+        post,
+        postComments
+    );
+
+
+    updateCommentCount(
+        post
+    );
+
+
+    const form =
+        container.querySelector(
+            ".comment-form"
+        );
+
+
+    form.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+
+            if (
+                !requireDiscussionLogin()
+            ) {
+
+                return;
+
+            }
+
+
+            const input =
+                container.querySelector(
+                    ".comment-input"
+                );
+
+
+            const text =
+                input.value.trim();
+
+
+            if (!text) {
+
+                return;
+
+            }
+
+
+            addComment(
+                post,
+                text
             );
 
-            return;
+
+            input.value = "";
+
         }
+    );
+
+}
 
 
-        const account =
-            XCOVIBE.account.getAccount();
+/* =========================================================
+   RENDER COMMENTS
+   ========================================================= */
+
+function renderComments(
+    post,
+    postComments
+) {
+
+    const container =
+        post.querySelector(
+            ".discussion-comments"
+        );
 
 
-        const post = document.createElement("article");
+    if (!container) {
 
-        post.className = "post";
+        return;
 
-        post.dataset.category = category;
+    }
 
 
-        post.innerHTML = `
+    const list =
+        container.querySelector(
+            ".comment-list"
+        );
 
-            <div class="post-top">
 
-                <div class="user-info">
+    const total =
+        container.querySelector(
+            ".comment-total"
+        );
 
-                    <div class="avatar">
-                        ${escapeHTML(
-                            account.username
-                                .charAt(0)
-                                .toUpperCase()
-                        )}
-                    </div>
 
-                    <div>
+    total.textContent =
+        postComments.length;
+
+
+    list.innerHTML = "";
+
+
+    if (
+        postComments.length === 0
+    ) {
+
+        list.innerHTML = `
+
+            <div class="no-comments">
+
+                Belum ada komentar.
+                Jadilah yang pertama berkomentar.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    postComments.forEach(
+        function (comment) {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "comment-item";
+
+
+            const replies =
+                comment.replies || [];
+
+
+            item.innerHTML = `
+
+                <div class="comment-avatar">
+
+                    ${escapeDiscussionHTML(
+                        comment.username
+                            .charAt(0)
+                            .toUpperCase()
+                    )}
+
+                </div>
+
+
+                <div class="comment-body">
+
+                    <div class="comment-meta">
 
                         <strong>
-                            ${escapeHTML(account.username)}
+                            @${escapeDiscussionHTML(
+                                comment.username
+                            )}
                         </strong>
 
                         <span>
-                            ${escapeHTML(category)}
-                            · just now
+                            ${comment.time}
                         </span>
+
+                    </div>
+
+
+                    <p>
+                        ${escapeDiscussionHTML(
+                            comment.text
+                        )}
+                    </p>
+
+
+                    <div class="comment-tools">
+
+                        <button
+                            type="button"
+                            class="reply-btn"
+                            data-comment-id="${comment.id}"
+                        >
+                            ↩ Reply
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="reply-area"
+                        id="reply-${comment.id}"
+                    ></div>
+
+
+                    <div class="reply-list">
+
+                        ${replies
+                            .map(
+                                function (reply) {
+
+                                    return `
+
+                                        <div class="reply-item">
+
+                                            <div class="reply-avatar">
+
+                                                ${escapeDiscussionHTML(
+                                                    reply.username
+                                                        .charAt(0)
+                                                        .toUpperCase()
+                                                )}
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <div class="comment-meta">
+
+                                                    <strong>
+                                                        @${escapeDiscussionHTML(
+                                                            reply.username
+                                                        )}
+                                                    </strong>
+
+                                                    <span>
+                                                        ${reply.time}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <p>
+                                                    ${escapeDiscussionHTML(
+                                                        reply.text
+                                                    )}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    `;
+
+                                }
+                            )
+                            .join("")
+                        }
 
                     </div>
 
                 </div>
 
-                <button class="more-btn">
-                    •••
-                </button>
-
-            </div>
+            `;
 
 
-            <h2>
-                ${escapeHTML(title)}
-            </h2>
+            list.appendChild(
+                item
+            );
 
 
-            <p>
-                ${escapeHTML(content)}
-            </p>
+            const replyButton =
+                item.querySelector(
+                    ".reply-btn"
+                );
 
 
-            <div class="post-actions">
+            replyButton.addEventListener(
+                "click",
+                function () {
 
-                <button class="like-btn">
-                    ♡
-                    <span>0</span>
-                </button>
+                    if (
+                        !requireDiscussionLogin()
+                    ) {
 
-                <button class="comment-btn">
-                    💬
-                    <span>0</span>
-                </button>
+                        return;
 
-                <button class="share-btn">
-                    ↗ Share
-                </button>
-
-            </div>
-        `;
+                    }
 
 
-        const feed =
-            document.querySelector(".feed");
+                    showReplyForm(
+                        post,
+                        comment
+                    );
 
-        const emptyResult =
-            document.getElementById("emptyResult");
+                }
+            );
 
+        }
+    );
 
-        feed.insertBefore(
-            post,
-            emptyResult
-        );
-
-
-        const form =
-            document.getElementById("createForm");
-
-        form.reset();
+}
 
 
-        closeCreateDiscussion();
+/* =========================================================
+   ADD COMMENT
+   ========================================================= */
+
+function addComment(
+    post,
+    text
+) {
+
+    const account =
+        discussionGetAccount();
 
 
-        XCOVIBE.ui.toast(
-            "Diskusi berhasil dibuat."
-        );
+    if (!account) {
 
-
-        attachLikeButton(
-            post.querySelector(".like-btn")
-        );
+        return;
 
     }
 
 
-    function attachLikeButton(button) {
-
-        if (!button) return;
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                const count =
-                    button.querySelector("span");
-
-                if (!count) return;
+    const postId =
+        getPostId(post);
 
 
-                const liked =
-                    button.classList.toggle("liked");
+    const comments =
+        getDiscussionComments();
 
 
-                let number =
-                    parseInt(
-                        count.textContent,
-                        10
-                    ) || 0;
+    if (!comments[postId]) {
+
+        comments[postId] = [];
+
+    }
 
 
-                number += liked ? 1 : -1;
+    comments[postId].push({
 
-                count.textContent =
-                    Math.max(0, number);
+        id:
+            "comment-" +
+            Date.now(),
+
+        username:
+            account.username,
+
+        text:
+            text,
+
+        time:
+            "Baru saja",
+
+        replies:
+            []
+
+    });
 
 
-                button.firstChild.textContent =
-                    liked ? "♥ " : "♡ ";
+    saveDiscussionComments(
+        comments
+    );
+
+
+    renderComments(
+        post,
+        comments[postId]
+    );
+
+
+    updateCommentCount(
+        post
+    );
+
+
+    if (
+        typeof showToast ===
+        "function"
+    ) {
+
+        showToast(
+            "Komentar berhasil ditambahkan."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REPLY FORM
+   ========================================================= */
+
+function showReplyForm(
+    post,
+    comment
+) {
+
+    const area =
+        post.querySelector(
+            "#reply-" +
+            comment.id
+        );
+
+
+    if (!area) {
+
+        return;
+
+    }
+
+
+    if (
+        area.querySelector(
+            ".reply-form"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    area.innerHTML = `
+
+        <form class="reply-form">
+
+            <input
+                type="text"
+                class="reply-input"
+                placeholder="Tulis balasan..."
+                maxlength="500"
+                autocomplete="off"
+            >
+
+            <button
+                type="submit"
+            >
+                Reply
+            </button>
+
+        </form>
+
+    `;
+
+
+    const form =
+        area.querySelector(
+            ".reply-form"
+        );
+
+
+    form.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+
+            const input =
+                form.querySelector(
+                    ".reply-input"
+                );
+
+
+            const text =
+                input.value.trim();
+
+
+            if (!text) {
+
+                return;
+
+            }
+
+
+            addReply(
+                post,
+                comment.id,
+                text
+            );
+
+        }
+    );
+
+
+    area
+        .querySelector(
+            ".reply-input"
+        )
+        .focus();
+
+}
+
+
+/* =========================================================
+   ADD REPLY
+   ========================================================= */
+
+function addReply(
+    post,
+    commentId,
+    text
+) {
+
+    const account =
+        discussionGetAccount();
+
+
+    if (!account) {
+
+        return;
+
+    }
+
+
+    const postId =
+        getPostId(post);
+
+
+    const comments =
+        getDiscussionComments();
+
+
+    const postComments =
+        comments[postId] || [];
+
+
+    const comment =
+        postComments.find(
+            function (item) {
+
+                return (
+                    item.id ===
+                    commentId
+                );
 
             }
         );
 
+
+    if (!comment) {
+
+        return;
+
     }
 
 
-    function init() {
+    if (!comment.replies) {
 
-        document
-            .querySelector(".create-btn")
-            ?.addEventListener(
-                "click",
-                openCreateDiscussion
+        comment.replies = [];
+
+    }
+
+
+    comment.replies.push({
+
+        id:
+            "reply-" +
+            Date.now(),
+
+        username:
+            account.username,
+
+        text:
+            text,
+
+        time:
+            "Baru saja"
+
+    });
+
+
+    saveDiscussionComments(
+        comments
+    );
+
+
+    renderComments(
+        post,
+        postComments
+    );
+
+
+    updateCommentCount(
+        post
+    );
+
+
+    if (
+        typeof showToast ===
+        "function"
+    ) {
+
+        showToast(
+            "Balasan berhasil ditambahkan."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   COMMENT BUTTON
+   ========================================================= */
+
+function activateCommentButton(
+    post
+) {
+
+    const button =
+        getCommentButton(post);
+
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    /*
+       Tandai supaya listener tidak
+       dipasang dua kali.
+    */
+
+    if (
+        button.dataset.commentReady ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    button.dataset.commentReady =
+        "true";
+
+
+    button.addEventListener(
+        "click",
+        function (event) {
+
+            /*
+               Jangan ubah angka komentar
+               hanya karena tombol diklik.
+            */
+
+            event.preventDefault();
+
+
+            /*
+               Kalau belum login,
+               popup muncul dan angka
+               tetap sama.
+            */
+
+            if (
+                !discussionIsLoggedIn()
+            ) {
+
+                requireDiscussionLogin();
+
+                return;
+
+            }
+
+
+            createCommentArea(
+                post
             );
 
 
-        document
-            .getElementById("closeAccountModal")
-            ?.addEventListener(
-                "click",
-                () => XCOVIBE.ui.closeModal(
-                    "accountModal"
+            const area =
+                post.querySelector(
+                    ".discussion-comments"
+                );
+
+
+            area.classList.toggle(
+                "comments-open"
+            );
+
+
+            if (
+                area.classList.contains(
+                    "comments-open"
+                )
+            ) {
+
+                area.scrollIntoView({
+                    behavior:
+                        "smooth",
+                    block:
+                        "nearest"
+                });
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LIKE — CAPTURE MODE
+   ========================================================= */
+
+function protectLikeButton(
+    button
+) {
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    if (
+        button.dataset.loginProtected ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    button.dataset.loginProtected =
+        "true";
+
+
+    /*
+       Capture mode sengaja digunakan
+       supaya event ini berjalan SEBELUM
+       handler Like lama dari script.js.
+    */
+
+    button.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                discussionIsLoggedIn()
+            ) {
+
+                /*
+                   User sudah login.
+                   Biarkan handler Like
+                   lama bekerja normal.
+                */
+
+                return;
+
+            }
+
+
+            /*
+               BELUM LOGIN:
+               hentikan SEMUA handler
+               Like sebelum angka berubah.
+            */
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+
+            requireDiscussionLogin();
+
+        },
+        true
+    );
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+function initializeDiscussionFeatures() {
+
+    const posts =
+        document.querySelectorAll(
+            ".post"
+        );
+
+
+    posts.forEach(
+        function (post) {
+
+            getPostId(post);
+
+            activateCommentButton(
+                post
+            );
+
+            protectLikeButton(
+                post.querySelector(
+                    ".like-btn"
                 )
             );
 
+        }
+    );
 
-        document
-            .getElementById("closeModal")
-            ?.addEventListener(
-                "click",
-                closeCreateDiscussion
-            );
+}
 
 
-        document
-            .getElementById("cancelModal")
-            ?.addEventListener(
-                "click",
-                closeCreateDiscussion
-            );
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-
-        document
-            .getElementById("createForm")
-            ?.addEventListener(
-                "submit",
-                createPost
-            );
-
-
-        document
-            .querySelectorAll(".like-btn")
-            .forEach(attachLikeButton);
+        initializeDiscussionFeatures();
 
     }
-
-
-    return {
-        init,
-        openCreateDiscussion
-    };
-
-})();
+);
